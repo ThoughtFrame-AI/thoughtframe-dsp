@@ -1,0 +1,9 @@
+# core runtime deps
+websockets
+
+# dsp stack
+numpy
+librosa
+soundfile
+scipy
+ffmpeg-python

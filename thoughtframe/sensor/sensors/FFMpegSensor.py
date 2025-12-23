@@ -5,6 +5,9 @@ import subprocess
 
 import numpy as np
 from thoughtframe.sensor.interface import AcousticSensor
+###https://registry.opendata.aws/pacific-sound/
+###https://docs.mbari.org/pacific-sound/notebooks/data/PacificSound2kHz/#retrieve-metadata-for-a-file
+
 
 
 class FfmpegAcousticSensor(AcousticSensor):

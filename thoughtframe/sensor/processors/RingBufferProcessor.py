@@ -54,7 +54,6 @@ class RingBufferProcessor(AcousticChunkProcessor):
         sensor_id = analysis.sensor_id or "unknown"
 
         self._save_queue.put((snapshot, ts, sensor_id))
-        analysis.flags.discard("saverequested")
 
         analysis.events.append({
             "type": "audio.snapshot.queued",
@@ -75,7 +74,7 @@ class RingBufferProcessor(AcousticChunkProcessor):
                 ##Maybe save this later?
                 ##filename = f"/tmp/audio_snapshot_{sensor_id}_{int(ts)}.npy"
                 ##np.save(filename, snapshot)
-                wave = f"/tmp/audio_snapshot_{sensor_id}_{int(ts)}.wav"
+                wave = f"audio/audio_snapshot_{sensor_id}_{int(ts)}.wav"
                 sf.write(wave,snapshot,samplerate=self.fs,subtype="FLOAT")
 
             finally:

@@ -5,7 +5,7 @@ MESH_CONFIG = {
         {
             "type": "ffmpeg",
             "id": "mic1",
-            "cmdX": [
+            "cmd-mic": [
                 "ffmpeg",
                 "-f", "alsa",
                 "-i", "default",
@@ -16,8 +16,7 @@ MESH_CONFIG = {
             ],
             "cmd": [
                 "ffmpeg",
-                "-re",                
-                "-i", "/tmp/audio_snapshot_mic1_1766426618.wav",
+                "-i", "samples/MARS-20150815T000000Z-2kHz.wav",
                 "-ac", "1",
                 "-ar", "8000",
                 "-f", "f32le",
@@ -28,7 +27,8 @@ MESH_CONFIG = {
             "pipeline": [
                 {"op": "debug"},
                 {"op": "isolation_forest", "threshold": 0.05},
-                ##{"op": "ring_buffer", "seconds": 20},
+                {"op": "ring_buffer", "seconds": 20},
+                {"op": "snapshot"},
 
                 
             ]
@@ -37,11 +37,16 @@ MESH_CONFIG = {
 }
 
 
+THOUGHTFRAME_CONFIG  = {
+    "root":"",
+    "samples":"/audio"
+}
+
+
+
+
 NETWORK_CONFIG  = {
     "baseurl":"https://localhost:8080",
     "websocket":"ws://localhost:8080/entermedia/services/websocket/org/thoughtframe/websocket/BenchConnection?sessionid={tabID}",
     "apphome":"/thoughtframe"
-    
-    
-    
 }

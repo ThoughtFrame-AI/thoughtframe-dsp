@@ -1,6 +1,6 @@
 import asyncio
 
-from thoughtframe.sensor import SensorManager
+from thoughtframe.sensor.SensorManager import SensorManager
 from thoughtframe.sensor.SensorProcessorManager import SensorProcessorManager
 from thoughtframe.sensor.interface import AcousticSensor, AcousticPipeline, \
     AcousticChunkProcessor
@@ -12,7 +12,6 @@ class SensorMeshManager:
     def __init__(self, manager):
         self._manager = manager
         self._sensor_factories = {}
-        self.register_sensor_types()
         self.pm = SensorProcessorManager()
         self.sm = SensorManager()
         

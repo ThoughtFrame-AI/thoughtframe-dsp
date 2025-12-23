@@ -21,11 +21,12 @@ class IsolationForestProcessor(AcousticChunkProcessor):
     @classmethod    
     def from_config(cls, cfg, sensor):
         fs = sensor.fs
-        threshold = cfg.get("threshold", 0.15)        
+        threshold = cfg.get("threshold", -0.2)        
         return cls(fs, threshold)
 
     def extract_features(self, chunk):
-        print("rms:", np.sqrt(np.mean(chunk**2)))
+        rms = np.sqrt(np.mean(chunk ** 2))
+        print("rms:", rms)
 
         ## This is taking a long vector, chunk, of audio
         ##doing FFTs of width 512 and sliding the window
@@ -55,24 +56,37 @@ class IsolationForestProcessor(AcousticChunkProcessor):
         ##create a new vector of the standard deviation of eacb
         std_vector = log_mel.std(axis=1)
        ## print(mean_vector, std_vector)
-
-        return np.concatenate([
+        feature_vector = np.concatenate([
             mean_vector,
             std_vector
         ])
+        
+       
+        feature_vector = np.concatenate([mean_vector, std_vector])
+
+        stats = {
+            "rms": rms,
+            "mel_mean_energy": float(mean_vector.mean()),
+            "mel_std_energy": float(std_vector.mean()),
+        }
+        
+        return feature_vector, stats
 
     def process(self, chunk: np.ndarray, analysis: AcousticAnalysis) -> None:
-        feat = self.extract_features(chunk)
+        feature_vector, stats = self.extract_features(chunk)
+        analysis.metadata.update(stats)
         
         if not self._trained:
-            self._feature_buffer.append(feat)
-            if len(self._feature_buffer) >= 50:
+            self._feature_buffer.append(feature_vector)
+            if len(self._feature_buffer) >= 2000:
                 self.detector.fit(self._feature_buffer)
                 self._trained = True
                 print("[ml] detector trained")
             return None
 
-        score = self.detector.decision_function([feat])[0]
+        score = self.detector.decision_function([feature_vector])[0]
+        analysis.metadata["iforest_score"] = score
+        print(f"score={score:.4f}")
         if score < self.threshold:
             print("Anomoly detected")
             analysis.flags.add("saverequested")
