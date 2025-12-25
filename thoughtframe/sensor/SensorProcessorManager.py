@@ -16,8 +16,10 @@ class SensorProcessorManager:
         return self._factories[op].from_config(cfg, sensor)
 
 
-    def register_processors(self):
+    def register_processors(self): 
         self.register("debug", DebugProbeProcessor)
         self.register("ring_buffer", RingBufferProcessor)
         self.register("isolation_forest", IsolationForestProcessor)
         self.register("snapshot", SnapshotProcessor)
+        self.register("spectral_features", SpectralFeatureProcessor)
+        self.register("temporal_context", TemporalContextProcessor)

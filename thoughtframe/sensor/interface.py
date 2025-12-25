@@ -56,7 +56,7 @@ class AcousticPipeline:
 
     def execute(self, chunk,node):
         analysis :AcousticAnalysis = AcousticAnalysis(chunk,node)
-        print(analysis.flags)
+        #print(analysis.flags)
         for processor in self.filters:
             processor.process(chunk,analysis)
         return analysis

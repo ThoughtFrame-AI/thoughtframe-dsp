@@ -16,7 +16,7 @@ MESH_CONFIG = {
             ],
             "cmd": [
                 "ffmpeg",
-                "-i", "samples/MARS-20150815T000000Z-2kHz.wav",
+                "-i", "samples/MARS-20150730T000000Z-16kHz.wav",
                 "-ac", "1",
                 "-ar", "8000",
                 "-f", "f32le",
@@ -26,7 +26,9 @@ MESH_CONFIG = {
             "chunk_size": 1024,
             "pipeline": [
                 {"op": "debug"},
-                {"op": "isolation_forest", "threshold": 0.05},
+                {"op": "spectral_features"},
+                {"op": "isolation_forest", "threshold": -0.1},
+                {"op": "temporal_context", "time": "1h"},
                 {"op": "ring_buffer", "seconds": 20},
                 {"op": "snapshot"},
 
@@ -38,7 +40,7 @@ MESH_CONFIG = {
 
 
 THOUGHTFRAME_CONFIG  = {
-    "root":"",
+    "root":".",
     "samples":"/audio"
 }
 

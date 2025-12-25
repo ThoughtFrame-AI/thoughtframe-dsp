@@ -3,9 +3,11 @@ import os
 from queue import Queue
 import threading
 import time
+
 from thoughtframe.sensor.interface import AcousticChunkProcessor
 from thoughtframe.sensor.mesh_config import MESH_CONFIG
 from thoughtframe.sensor.mesh_config import THOUGHTFRAME_CONFIG
+from thoughtframe.bootstrap import thoughtframe
 
 
 class SnapshotProcessor(AcousticChunkProcessor):
@@ -19,6 +21,8 @@ class SnapshotProcessor(AcousticChunkProcessor):
             daemon=True
         )
         self._worker.start()
+        print("SnapshotProcessor worker started")
+
     
     def process(self, chunk, analysis):
         analysis.metadata["chunk_len"] = len(chunk)
@@ -33,14 +37,16 @@ class SnapshotProcessor(AcousticChunkProcessor):
         return cls(cfg, sensor)    
     
     def _save_worker(self):
+        print(">>> ENTERED _save_worker", self, SnapshotProcessor)
+
         """
         Background persistence loop.
         This NEVER runs on the audio path.
         """
         while True:
-                
+            analysis = self._save_queue.get()
+   
             try:
-                analysis = self._save_queue.get()
                 record = {
                     "timestamp": analysis.timestamp or time.time(),
                     "sensor_id": analysis.sensor_id,
@@ -51,10 +57,9 @@ class SnapshotProcessor(AcousticChunkProcessor):
                     "events": list(analysis.events),
                 }
                 ts = int(record["timestamp"])
-
-                saveroot = os.path.join(
-                    THOUGHTFRAME_CONFIG["root"],
-                    THOUGHTFRAME_CONFIG["samples"],
+                saveroot = thoughtframe.resolve_rooted_path(
+                    THOUGHTFRAME_CONFIG,
+                    THOUGHTFRAME_CONFIG.get("samples", "audio"),
                     record["sensor_id"]
                 )
                 path = os.path.join(
@@ -67,6 +72,8 @@ class SnapshotProcessor(AcousticChunkProcessor):
                     json.dump(record, f, indent=2)
                 ##turn analysis into 
                 print("Saving analysis")
-                
+            except Exception as e:
+                print("crashed" ,e)
+                raise                   
             finally:
                 self._save_queue.task_done()

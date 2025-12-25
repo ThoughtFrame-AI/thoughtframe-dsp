@@ -20,6 +20,8 @@ async def main():
     configure()
     ##Add out own 
     thoughtframe.manager.register("sensormeshmanager",lambda: SensorMeshManager(thoughtframe.manager))
+    ##thoughtframe.manager.register("postprocessor",lambda: SensorPostProcessor(thoughtframe.manager))
+
     #asyncio.create_task(ml_task())
     # await asyncio.Event().wait()
     # if len(sys.argv) > 1:

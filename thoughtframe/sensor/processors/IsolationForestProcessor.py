@@ -21,12 +21,12 @@ class IsolationForestProcessor(AcousticChunkProcessor):
     @classmethod    
     def from_config(cls, cfg, sensor):
         fs = sensor.fs
-        threshold = cfg.get("threshold", -0.2)        
+        threshold = cfg.get("threshold", -0.5)        
         return cls(fs, threshold)
 
     def extract_features(self, chunk):
-        rms = np.sqrt(np.mean(chunk ** 2))
-        print("rms:", rms)
+        
+        ##print("rms:", rms)
 
         ## This is taking a long vector, chunk, of audio
         ##doing FFTs of width 512 and sliding the window
@@ -65,7 +65,6 @@ class IsolationForestProcessor(AcousticChunkProcessor):
         feature_vector = np.concatenate([mean_vector, std_vector])
 
         stats = {
-            "rms": rms,
             "mel_mean_energy": float(mean_vector.mean()),
             "mel_std_energy": float(std_vector.mean()),
         }
@@ -78,20 +77,19 @@ class IsolationForestProcessor(AcousticChunkProcessor):
         
         if not self._trained:
             self._feature_buffer.append(feature_vector)
-            if len(self._feature_buffer) >= 2000:
+            if len(self._feature_buffer) >= 20000:
                 self.detector.fit(self._feature_buffer)
                 self._trained = True
                 print("[ml] detector trained")
             return None
 
         score = self.detector.decision_function([feature_vector])[0]
-        analysis.metadata["iforest_score"] = score
-        print(f"score={score:.4f}")
+        analysis.metadata["iforest_score"] = float(score)
+        ##print(f"score={score:.4f}")
         if score < self.threshold:
-            print("Anomoly detected")
-            analysis.flags.add("saverequested")
+            #print("Anomoly detected")
             analysis.flags.add("anomolydetected")
-            print(analysis.flags)
+            #print(analysis.flags)
             
             
         return 

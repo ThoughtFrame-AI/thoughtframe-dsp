@@ -1,14 +1,17 @@
 # thoughtframe/sensor/processors/ring_buffer.py
 
-import time
-import threading
 from collections import deque
 from queue import Queue
+import threading
+import time
+import os
+from numpy import record
+
 import numpy as np
 import soundfile as sf
-
-
+from thoughtframe.bootstrap import thoughtframe
 from thoughtframe.sensor.interface import AcousticChunkProcessor, AcousticAnalysis
+from thoughtframe.sensor.mesh_config import THOUGHTFRAME_CONFIG
 
 
 class RingBufferProcessor(AcousticChunkProcessor):
@@ -69,12 +72,21 @@ class RingBufferProcessor(AcousticChunkProcessor):
         """
         while True:
             snapshot, ts, sensor_id = self._save_queue.get()
+            ts = int(ts)
 
             try:
                 ##Maybe save this later?
                 ##filename = f"/tmp/audio_snapshot_{sensor_id}_{int(ts)}.npy"
                 ##np.save(filename, snapshot)
-                wave = f"audio/audio_snapshot_{sensor_id}_{int(ts)}.wav"
+                saveroot = thoughtframe.resolve_rooted_path(
+                    THOUGHTFRAME_CONFIG,
+                    THOUGHTFRAME_CONFIG.get("samples", "audio"),
+                    sensor_id
+                )
+                wave = os.path.join(
+                    saveroot,
+                    f"audio_snapshot_{sensor_id}_{ts}.wav"
+                )
                 sf.write(wave,snapshot,samplerate=self.fs,subtype="FLOAT")
 
             finally:
