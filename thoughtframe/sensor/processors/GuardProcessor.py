@@ -7,7 +7,8 @@ from thoughtframe.sensor.interface import (
 
 
 class GuardProcessor(AcousticChunkProcessor):
- 
+    OP_NAME = "guard" 
+
     def __init__(self, cfg: dict, sensor, children: list[AcousticChunkProcessor]):
         self.cfg = cfg
         self.sensor = sensor
@@ -34,7 +35,7 @@ class GuardProcessor(AcousticChunkProcessor):
 
         children = []
         for child_cfg in cfg.get("pipeline", []):
-            child = mesh.processor_manager.createProcessor(child_cfg, sensor)
+            child = mesh.pm.createProcessor(child_cfg, sensor)
             children.append(child)
 
         return cls(cfg, sensor, children)

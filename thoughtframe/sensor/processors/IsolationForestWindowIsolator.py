@@ -5,6 +5,9 @@ from thoughtframe.sensor.processors.WindowIsolator import WindowIsolator
 
 
 class IsolationForestWindowIsolator(WindowIsolator):
+    
+    OP_NAME = "if_window_isolator" 
+
     """
     Window isolator driven by Isolation Forest anomaly score.
     """

@@ -4,7 +4,8 @@ from thoughtframe.bootstrap import thoughtframe
 from thoughtframe.sensor.mesh_config import THOUGHTFRAME_CONFIG
 
 class TelemtryLogger(AcousticChunkProcessor):
-    
+    OP_NAME = "telemetry" 
+
     def __init__(self, cfg, sensor):
         self.sensor = sensor
         self.start_ts = None

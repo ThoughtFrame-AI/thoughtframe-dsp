@@ -15,7 +15,8 @@ class SpectralFeatureProcessor(AcousticChunkProcessor):
     """
     Rolling in-memory audio buffer with asynchronous snapshot persistence.
     """
-
+    OP_NAME = "spectral_features" 
+    
     def __init__(self,fs: int):
         self.fs = fs
         

@@ -15,6 +15,9 @@ from thoughtframe.sensor.mesh_config import THOUGHTFRAME_CONFIG
 
 
 class RingBufferProcessor(AcousticChunkProcessor):
+    
+    OP_NAME = "ring_buffer" 
+    
     """
     Rolling in-memory audio buffer with asynchronous snapshot persistence.
     """

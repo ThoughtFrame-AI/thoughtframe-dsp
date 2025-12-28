@@ -12,6 +12,8 @@ from thoughtframe.bootstrap import thoughtframe
 
 class SnapshotProcessor(AcousticChunkProcessor):
     
+    OP_NAME = "snapshot" 
+    
     def __init__(self, cfg, sensor):
         self.config = cfg
         self.sensor = sensor

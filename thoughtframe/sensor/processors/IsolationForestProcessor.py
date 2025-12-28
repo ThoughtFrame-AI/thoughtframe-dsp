@@ -7,6 +7,9 @@ from thoughtframe.sensor.interface import AcousticChunkProcessor
 from thoughtframe.sensor.interface import AcousticAnalysis
 
 class IsolationForestProcessor(AcousticChunkProcessor):
+    
+    OP_NAME = "isolation_forest" 
+
     def __init__(self, fs, threshold):
         
         self.fs = fs

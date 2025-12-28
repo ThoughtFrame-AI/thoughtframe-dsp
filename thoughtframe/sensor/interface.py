@@ -33,7 +33,8 @@ class AcousticAnalysis:
     
 
 class AcousticChunkProcessor(ABC):
-   
+    OP_NAME: str | None = None
+
     @abstractmethod
     def process(self, chunk: np.ndarray, analysis: AcousticAnalysis) -> None:
         pass

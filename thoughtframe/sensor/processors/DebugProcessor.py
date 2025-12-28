@@ -2,7 +2,8 @@ from thoughtframe.sensor.interface import AcousticChunkProcessor
 
 
 class DebugProbeProcessor(AcousticChunkProcessor):
-    
+    OP_NAME = "debug" 
+
     def process(self, chunk, analysis):
         analysis.metadata["chunk_len"] = len(chunk)
         

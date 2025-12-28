@@ -4,6 +4,8 @@ from pytimeparse.timeparse import timeparse
 
 class TemporalContextProcessor(AcousticChunkProcessor):
     
+    OP_NAME = "temporal_context" 
+
     
     def __init__(self, cfg, sensor):
         

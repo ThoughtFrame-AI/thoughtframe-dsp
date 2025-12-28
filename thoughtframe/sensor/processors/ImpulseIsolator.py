@@ -4,10 +4,12 @@ from collections import deque
 import os
 import numpy as np
 from thoughtframe.sensor.interface import AcousticAnalysis
-from thoughtframe.sensor.processors import WindowIsolator
+from .WindowIsolator import WindowIsolator
 
 
 class ImpulseIsolator(WindowIsolator):
+    OP_NAME = "impulse_isolator" 
+
     """
     Window isolator based on impulse density / ICI statistics.
     Includes RAW LOGGING for forensics.

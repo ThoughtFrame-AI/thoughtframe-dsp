@@ -10,6 +10,7 @@ from thoughtframe.sensor.processors.WindowIsolator import WindowIsolator
 
 
 class TimeWindowIsolator(WindowIsolator): 
+    OP_NAME = "time_window_isolator" 
 
     def __init__(self, cfg, sensor):
         super().__init__(cfg, sensor)
