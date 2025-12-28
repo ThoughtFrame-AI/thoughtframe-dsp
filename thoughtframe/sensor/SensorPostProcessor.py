@@ -31,7 +31,7 @@ class SensorNode:
 class SensorMesh:
       
     def __init__(self, meshmanager, MESH_CONFIG):
-        self.meshmanager = meshmanager;
+        self.mesh = meshmanager;
         self.nodes =[]
         self.config = MESH_CONFIG
         self.tasks = []
@@ -39,11 +39,11 @@ class SensorMesh:
     def build(self):
         for item in self.config['sensors']:
             print(item)
-            sensor:AcousticSensor = self.meshmanager.sm.createSensor(item)
+            sensor:AcousticSensor = self.mesh.sm.createSensor(item)
             pipelineconfig =item['pipeline']
             pipeline:AcousticPipeline = AcousticPipeline()
             for element in pipelineconfig:
-                chunkprocessor: AcousticChunkProcessor = self.meshmanager.pm.createProcessor(element, sensor)
+                chunkprocessor: AcousticChunkProcessor = self.mesh.pm.createProcessor(element, sensor)
                 pipeline.addChunkProcessor(chunkprocessor)
             node = SensorNode(sensor, pipeline)
             self.nodes.append(node)

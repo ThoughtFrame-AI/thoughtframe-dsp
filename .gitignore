@@ -51,3 +51,4 @@ config.local.*
 .DS_Store
 Thumbs.db
 /samples/
+/audio/

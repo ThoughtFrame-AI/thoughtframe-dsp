@@ -11,7 +11,25 @@ class AcousticAnalysis:
         self.events: list[dict] = []
         self.metadata: dict = {}
         self.flags: set[str] = set()   
-        
+        self._fft = None
+        self._fft_freqs = None
+    
+    
+    @property
+    def fft(self):
+        if self._fft is None:
+            self._fft = np.fft.rfft(self.chunk)
+            self._fft_freqs = np.fft.rfftfreq(
+                len(self.chunk),
+                d=1.0 / self.node.sensor.fs
+            )
+        return self._fft
+
+    @property
+    def fft_freqs(self):
+        # ensure fft computed
+        _ = self.fft
+        return self._fft_freqs
     
 
 class AcousticChunkProcessor(ABC):
@@ -25,6 +43,8 @@ class AcousticChunkProcessor(ABC):
         raise NotImplementedError(
             f"{cls.__name__}.from_config() must be implemented"
         )
+
+
 
 class AcousticSensor(ABC):
     def __init__(self, sensor_id: str,fs: int, chunk_size: int):

@@ -1,12 +1,12 @@
 from thoughtframe.sensor.interface import AcousticChunkProcessor
 from pytimeparse.timeparse import timeparse
-from numba.core.types import none
 
 
 class TemporalContextProcessor(AcousticChunkProcessor):
     
     
     def __init__(self, cfg, sensor):
+        
         self.cfg = cfg
         self.sensor = sensor
         
@@ -44,11 +44,19 @@ class TemporalContextProcessor(AcousticChunkProcessor):
             self.centroid_mean = self.centroid_mean + self.decayfactor * (centroid - self.centroid_mean)
             analysis.metadata["centroid_mean"] = self.centroid_mean
 
-        is_anomaly = 1.0 if "anomolydetected" in analysis.flags else 0.0
+        score = analysis.metadata.get("iforest_score")
+        if score is None:
+            return
+
+        novelty = -score
         
-        self.anomaly_rate = (self.anomaly_rate + self.decayfactor * (is_anomaly - self.anomaly_rate))
-        if(self.anomaly_rate > .12):
-            print(f"Mean: {self.rms_mean} Variance: {self.rms_var} Anomoly Rate: {self.anomaly_rate}")    
+        self.anomaly_rate = (self.anomaly_rate    + self.decayfactor * (novelty - self.anomaly_rate))
+        analysis.metadata["anomaly_rate"] = float(self.anomaly_rate)
+        
+
+                                
+
+        
         
     
     

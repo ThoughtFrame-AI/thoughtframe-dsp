@@ -16,7 +16,7 @@ MESH_CONFIG = {
             ],
             "cmd": [
                 "ffmpeg",
-                "-i", "samples/MARS-20150730T000000Z-16kHz.wav",
+                "-i", "samples/OneDayHydrophone.flac",
                 "-ac", "1",
                 "-ar", "8000",
                 "-f", "f32le",
@@ -29,8 +29,36 @@ MESH_CONFIG = {
                 {"op": "spectral_features"},
                 {"op": "isolation_forest", "threshold": -0.1},
                 {"op": "temporal_context", "time": "1h"},
-                {"op": "ring_buffer", "seconds": 20},
-                {"op": "snapshot"},
+                #{"op": "window_isolator", "enter_threshold": 0.08, "exit_threshold": 0.05, "min_duration": "15s"},
+                {"op": "if_window_isolator", "threshold" : -0.1, "min_duration": "5m"},
+                {"op": "time_window_isolator", "enter_threshold": 0.08, "width": "2m", "min_duration": "15s"},
+                {"op": "guard",
+                 "name": "impulses_high",
+                 "band": [600, 3000],
+                 "pipeline": [
+                     {"op": "impulse_isolator",
+                      "threshold_mult": 10.0,
+                      "window_sec": 5.0,
+                      "min_impulses": 5}
+                 ]
+                },
+                {"op": "guard",
+                 "name": "impulses_low",
+                 "band": [20, 250],
+                 "pipeline": [
+                     {"op": "impulse_isolator",
+                      "threshold_mult": 10.0,
+                      "window_sec": 5.0,
+                      "min_impulses": 5}
+                 ]
+                },
+
+ 
+                
+               
+                ##{"op": "ring_buffer", "seconds": 20},
+                ##{"op": "snapshot"},
+                {"op": "telemetry"},
 
                 
             ]

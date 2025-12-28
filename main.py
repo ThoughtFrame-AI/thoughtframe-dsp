@@ -41,11 +41,12 @@ async def main():
     #
     sensormanager  = thoughtframe.get("sensormeshmanager")
     sensormanager.start()
+    ##await connection_service.start(url)
+
     await asyncio.Event().wait()
     
     # 2. Start the connection. This method owns the async with block, 
     #    keepalive, and message consumption loop.
-    ##await connection_service.start(url)
 
 # 3. Run the application
 asyncio.run(main())

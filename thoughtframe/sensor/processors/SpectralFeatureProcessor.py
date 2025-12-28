@@ -29,13 +29,15 @@ class SpectralFeatureProcessor(AcousticChunkProcessor):
     def process(self, chunk: np.ndarray, analysis: AcousticAnalysis) -> None:
         rms = np.sqrt(np.mean(chunk ** 2))
 
-        fft = np.fft.rfft(chunk)
+        fft = analysis.fft
+        freqs = analysis.fft_freqs
+        
         ##fft incudes phase so remove 
         mag = np.abs(fft)
         ##turn to power
         power = mag ** 2
         ##what are freqs speciically?  
-        freqs = np.fft.rfftfreq(len(chunk), d=1.0 / self.fs)
+        
         ##find a peak?
         centroid = np.sum(freqs * power) / np.sum(power)
         ##width of the peak? 
@@ -49,4 +51,6 @@ class SpectralFeatureProcessor(AcousticChunkProcessor):
         "spec_bandwidth_hz": float(bandwidth),
         "spec_rolloff_hz": float(rolloff),
         "spec_flatness": float(flatness),
+        
         })
+        

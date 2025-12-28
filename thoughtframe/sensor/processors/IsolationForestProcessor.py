@@ -8,6 +8,7 @@ from thoughtframe.sensor.interface import AcousticAnalysis
 
 class IsolationForestProcessor(AcousticChunkProcessor):
     def __init__(self, fs, threshold):
+        
         self.fs = fs
         self.threshold = threshold
         self.detector = IsolationForest(
@@ -56,11 +57,7 @@ class IsolationForestProcessor(AcousticChunkProcessor):
         ##create a new vector of the standard deviation of eacb
         std_vector = log_mel.std(axis=1)
        ## print(mean_vector, std_vector)
-        feature_vector = np.concatenate([
-            mean_vector,
-            std_vector
-        ])
-        
+               
        
         feature_vector = np.concatenate([mean_vector, std_vector])
 
@@ -77,19 +74,14 @@ class IsolationForestProcessor(AcousticChunkProcessor):
         
         if not self._trained:
             self._feature_buffer.append(feature_vector)
-            if len(self._feature_buffer) >= 20000:
+            if len(self._feature_buffer) >= 400:
                 self.detector.fit(self._feature_buffer)
                 self._trained = True
                 print("[ml] detector trained")
             return None
 
         score = self.detector.decision_function([feature_vector])[0]
-        analysis.metadata["iforest_score"] = float(score)
-        ##print(f"score={score:.4f}")
-        if score < self.threshold:
-            #print("Anomoly detected")
-            analysis.flags.add("anomolydetected")
-            #print(analysis.flags)
+        analysis.metadata["iforest_score"] = float(score)    
             
             
-        return 
+         
