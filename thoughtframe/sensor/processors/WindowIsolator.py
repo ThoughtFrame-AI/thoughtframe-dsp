@@ -4,7 +4,7 @@ import numpy as np
 from abc import ABC, abstractmethod
 from pytimeparse.timeparse import timeparse
 
-from thoughtframe.bootstrap import thoughtframe
+from tf_core.bootstrap import thoughtframe
 from thoughtframe.sensor.interface import AcousticChunkProcessor
 from thoughtframe.sensor.mesh_config import THOUGHTFRAME_CONFIG
 

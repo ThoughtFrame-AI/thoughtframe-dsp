@@ -1,7 +1,6 @@
 import csv, os, time
 
 from pytimeparse.timeparse import timeparse
-from thoughtframe.bootstrap import thoughtframe
 
 import numpy as np
 from thoughtframe.sensor.interface import AcousticChunkProcessor

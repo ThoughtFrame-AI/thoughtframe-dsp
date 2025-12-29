@@ -1,5 +1,5 @@
 import numpy as np
-from thoughtframe.bootstrap import thoughtframe
+from tf_core.bootstrap import thoughtframe
 from thoughtframe.sensor.interface import (
     AcousticChunkProcessor,
     AcousticAnalysis,

@@ -9,7 +9,7 @@ from numpy import record
 
 import numpy as np
 import soundfile as sf
-from thoughtframe.bootstrap import thoughtframe
+from tf_core.bootstrap import thoughtframe
 from thoughtframe.sensor.interface import AcousticChunkProcessor, AcousticAnalysis
 from thoughtframe.sensor.mesh_config import THOUGHTFRAME_CONFIG
 

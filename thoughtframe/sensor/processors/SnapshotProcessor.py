@@ -7,7 +7,7 @@ import time
 from thoughtframe.sensor.interface import AcousticChunkProcessor
 from thoughtframe.sensor.mesh_config import MESH_CONFIG
 from thoughtframe.sensor.mesh_config import THOUGHTFRAME_CONFIG
-from thoughtframe.bootstrap import thoughtframe
+from tf_core.bootstrap import thoughtframe
 
 
 class SnapshotProcessor(AcousticChunkProcessor):

@@ -1,6 +1,6 @@
 import csv, os, time
 from thoughtframe.sensor.interface import AcousticChunkProcessor
-from thoughtframe.bootstrap import thoughtframe
+from tf_core.bootstrap import thoughtframe
 from thoughtframe.sensor.mesh_config import THOUGHTFRAME_CONFIG
 
 class TelemtryLogger(AcousticChunkProcessor):

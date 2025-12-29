@@ -1,5 +1,3 @@
-# thoughtframe/sensor/sensormesh_config.py
-
 MESH_CONFIG = {
     "sensors": [
         {
@@ -80,3 +78,11 @@ NETWORK_CONFIG  = {
     "websocket":"ws://localhost:8080/entermedia/services/websocket/org/thoughtframe/websocket/BenchConnection?sessionid={tabID}",
     "apphome":"/thoughtframe"
 }
+
+
+THOUGHTFRAME_APP_CONFIG = {
+    "mesh": MESH_CONFIG,
+    "paths": THOUGHTFRAME_CONFIG,
+    "network": NETWORK_CONFIG,
+}
+
