@@ -77,7 +77,7 @@ class IsolationForestProcessor(AcousticChunkProcessor):
         
         if not self._trained:
             self._feature_buffer.append(feature_vector)
-            if len(self._feature_buffer) >= 400:
+            if len(self._feature_buffer) >= 2000:
                 self.detector.fit(self._feature_buffer)
                 self._trained = True
                 print("[ml] detector trained")

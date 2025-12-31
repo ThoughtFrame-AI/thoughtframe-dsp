@@ -5,7 +5,8 @@ from abc import ABC, abstractmethod
 from pytimeparse.timeparse import timeparse
 
 from tf_core.bootstrap import thoughtframe
-from thoughtframe.sensor.interface import AcousticChunkProcessor
+from thoughtframe.sensor.interface import AcousticChunkProcessor,\
+    AcousticAnalysis
 from thoughtframe.sensor.mesh_config import THOUGHTFRAME_CONFIG
 
 
@@ -88,7 +89,10 @@ class WindowIsolator(AcousticChunkProcessor, ABC):
             "state": None,
             "start_t": None,
             "end_t": None,
+            "start_chunk": None,
+            "end_chunk": None,
             "duration_sec": None,
+            "duration_chunks": None,
             "num_chunks": 0,
 
             # acoustic aggregates (optional but standardized)
@@ -116,14 +120,14 @@ class WindowIsolator(AcousticChunkProcessor, ABC):
 
         # --- first invocation ---
         if self.window_stats is None:
-            self._start_window(t_sec, proposed_state)
+            self._start_window(t_sec, analysis, proposed_state)
 
         # --- state transition ---
         elif proposed_state != self.state:
             duration = t_sec - self.window_start_t
             if duration >= self.min_duration_sec:
-                self._close_window(t_sec)
-                self._start_window(t_sec, proposed_state)
+                self._close_window(t_sec, analysis)
+                self._start_window(t_sec, analysis,proposed_state)
             # else: ignore short dwell
 
         # --- per-chunk accounting (owned by base) ---
@@ -172,13 +176,14 @@ class WindowIsolator(AcousticChunkProcessor, ABC):
     # INTERNAL HELPERS
     # ------------------------------------------------------------------
 
-    def _start_window(self, t_sec: float, state: str):
+    def _start_window(self, t_sec: float, analysis: AcousticAnalysis, state: str):
         self.window_id += 1
         self.state = state
         self.window_start_t = t_sec
-
+        self.window_start_chunk = analysis.chunk_index
         # base schema first
         stats = self._base_window_stats()
+        
 
         # subclass extensions
         stats.update(self._init_window_stats())
@@ -187,13 +192,17 @@ class WindowIsolator(AcousticChunkProcessor, ABC):
         stats["window_id"] = self.window_id
         stats["state"] = state
         stats["start_t"] = t_sec
-
+        stats["start_chunk"] = analysis.chunk_index
         self.window_stats = stats
 
-    def _close_window(self, t_sec: float):
+    def _close_window(self, t_sec: float, analysis: AcousticAnalysis):
         stats = self.window_stats
         stats["end_t"] = t_sec
+        stats["end_chunk"] = analysis.chunk_index
         stats["duration_sec"] = t_sec - self.window_start_t
+        stats["duration_chunks"] = (
+            stats["end_chunk"] - stats["start_chunk"]
+        )
         self._write_window(stats)
 
     def _write_window(self, stats: dict):

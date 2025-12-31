@@ -50,7 +50,6 @@ class IsolationForestWindowIsolator(WindowIsolator):
     def _update_window_stats(self, stats: dict, chunk, analysis) -> None:
         m = analysis.metadata
 
-        stats["num_chunks"] += 1
         n = stats["num_chunks"]
 
        

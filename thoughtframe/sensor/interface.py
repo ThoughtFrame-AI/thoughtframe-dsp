@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import AsyncIterator
+
 import numpy as np
+
+
 
 class AcousticAnalysis:
     def __init__(self, chunk, node, timestamp=None):
@@ -14,6 +17,9 @@ class AcousticAnalysis:
         self._fft = None
         self._fft_freqs = None
     
+    @property
+    def chunk_index(self):
+        return self.node.chunk_index
     
     @property
     def fft(self):
@@ -79,5 +85,8 @@ class AcousticPipeline:
         analysis :AcousticAnalysis = AcousticAnalysis(chunk,node)
         #print(analysis.flags)
         for processor in self.filters:
+            
             processor.process(chunk,analysis)
         return analysis
+
+

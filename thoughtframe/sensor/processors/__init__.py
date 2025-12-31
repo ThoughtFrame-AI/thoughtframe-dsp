@@ -4,7 +4,6 @@ from .ImpulseIsolator import ImpulseIsolator
 from .IsolationForestProcessor import IsolationForestProcessor
 from .IsolationForestWindowIsolator import IsolationForestWindowIsolator 
 from .RingBufferProcessor import RingBufferProcessor
-from .SnapshotProcessor import SnapshotProcessor
 from .SpectralFeatureProcessor import SpectralFeatureProcessor
 from .TelemtryLogger import TelemtryLogger 
 from .TemporalContextProcessor import TemporalContextProcessor
