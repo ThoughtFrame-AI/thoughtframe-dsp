@@ -23,6 +23,20 @@ class AcousticAnalysis:
     
     @property
     def fft(self):
+        ## TODO:  TEst with hanning windows also
+        # # 1. Create the Hanning Window
+        #     # (In production, pre-calculate this once in __init__ for speed)
+        #     window = np.hanning(len(self.chunk))
+        #
+        #     # 2. Apply Window -> Compute FFT
+        #     self._fft = np.fft.rfft(self.chunk * window)
+        #
+        #     self._fft_freqs = np.fft.rfftfreq(
+        #         len(self.chunk),
+        #         d=1.0 / self.node.sensor.fs
+        #     )
+        #
+
         if self._fft is None:
             self._fft = np.fft.rfft(self.chunk)
             self._fft_freqs = np.fft.rfftfreq(

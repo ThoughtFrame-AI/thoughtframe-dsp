@@ -1,4 +1,6 @@
 import asyncio
+import json
+from pathlib import Path
 
 from thoughtframe.sensor.SensorManager import SensorManager
 from thoughtframe.sensor.SensorProcessorManager import SensorProcessorManager
@@ -14,12 +16,30 @@ class SensorMeshManager:
         self._sensor_factories = {}
         self.pm = SensorProcessorManager()
         self.sm = SensorManager()
-        
+        self.mesh = None
+
   
-    def start(self):
-        self.mesh = SensorMesh(self, MESH_CONFIG)
+    def start(self, request=None):
+        if request and "mesh" in request:
+            cfg = request["mesh"]
+            source = "inline"
+        else:
+            cfg_path = (
+                Path(__file__).parents[1] / "config" / "mesh.json"
+            )
+            with cfg_path.open() as f:
+                cfg = json.load(f)
+            source = str(cfg_path)
+
+        self.mesh = SensorMesh(self, cfg)
         self.mesh.build()
-        self.mesh.run()
+
+        asyncio.get_running_loop().call_soon(self.mesh.run)
+
+        return {
+            "status": "started",
+            "config_source": source
+        }
 
 class SensorNode:
     
@@ -33,15 +53,14 @@ class SensorNode:
 
 class SensorMesh:
       
-    def __init__(self, meshmanager, MESH_CONFIG):
+    def __init__(self, meshmanager, config):
         self.mesh = meshmanager;
         self.nodes =[]
-        self.config = MESH_CONFIG
+        self.config = config
         self.tasks = []
         self.source_tasks = []
         self.sensor_registry = {}      # id -> AcousticSensor
         self.array_registry = {}       # id -> ArrayCoordinator
-
         
         
     def build(self):

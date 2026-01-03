@@ -32,8 +32,8 @@ class ImpulseIsolator(WindowIsolator):
         
         # --- QUICK & DIRTY LOGGING ---
         # Ensure directory exists first
-        os.makedirs("thoughtframe/telemetry", exist_ok=True)
-        self.raw_log = open("thoughtframe/telemetry/raw_impulses.txt", "w")
+        ##os.makedirs("thoughtframe/telemetry", exist_ok=True)
+        ##self.raw_log = open("thoughtframe/telemetry/raw_impulses.txt", "w")
 
     @classmethod
     def from_config(cls, cfg, sensor):
@@ -81,10 +81,10 @@ class ImpulseIsolator(WindowIsolator):
                 self.last_impulse_time = impulse_time
                 
                 # --- LOG IT RAW ---
-                self.raw_log.write(f"{impulse_time:.6f}\n")
+                ##self.raw_log.write(f"{impulse_time:.6f}\n")
         
         # Flush occasionally to make sure data hits disk if you stop early
-        self.raw_log.flush()
+        ##self.raw_log.flush()
 
         cutoff = t_sec - self.window_seconds
         while self.impulsebuffer and self.impulsebuffer[0] < cutoff:

@@ -8,7 +8,14 @@ class TelemtryLogger(AcousticChunkProcessor):
 
     def __init__(self, cfg, sensor):
         self.sensor = sensor
-        self.start_ts = None
+        
+        self.flush_every = int(cfg.get("flush_every", 256))  # ← key line
+        self._rows_since_flush = 0
+        
+        base = cfg.get("csv_name", "telemetry")
+        prefix = cfg.get("csv_prefix")
+
+        filename = f"{prefix}_{base}.csv" if prefix else f"{base}.csv"
 
         path = thoughtframe.resolve_rooted_path(
             THOUGHTFRAME_CONFIG,
@@ -17,7 +24,7 @@ class TelemtryLogger(AcousticChunkProcessor):
         )
         os.makedirs(path, exist_ok=True)
 
-        self.csv_path = os.path.join(path, "telemetry.csv")
+        self.csv_path = os.path.join(path, filename)
         self.f = open(self.csv_path, "a", newline="")
         self.w = csv.writer(self.f)
 
@@ -32,6 +39,7 @@ class TelemtryLogger(AcousticChunkProcessor):
                 "iforest_score",
                 "anomaly_rate"
             ])
+
             
     @classmethod
     def from_config(cls, cfg, sensor):
@@ -50,4 +58,11 @@ class TelemtryLogger(AcousticChunkProcessor):
             m.get("iforest_score"),
             m.get("anomaly_rate")
         ])
+        
+        self._rows_since_flush += 1
+
+        if self._rows_since_flush >= self.flush_every:
+            self.f.flush()
+            self._rows_since_flush = 0
+        
         self.f.flush()

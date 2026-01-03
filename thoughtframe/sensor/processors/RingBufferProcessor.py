@@ -1,4 +1,5 @@
 from collections import deque
+import requests
 import os
 import csv
 import threading
@@ -22,11 +23,13 @@ class RingBufferProcessor(AcousticChunkProcessor):
         "centroid_mean", "centroid_var"
     ]
 
-    def __init__(self, window_sec: int, fs: int, chunk_size: int, sensor_id: str):
+    def __init__(self,cfg, window_sec: int, fs: int, chunk_size: int, sensor_id: str):
         self.fs = fs
         self.chunk_size = chunk_size
         self.sensor_id = sensor_id
         self.window_limit = window_sec
+
+        self._java_endpoint = cfg.get( "guard_endpoint", "http://localhost:8080/thoughtframe/lab/dsp/api/handlewindowevent" )
 
         # Buffer sizing (Window + 50% headroom for safety)
         buffer_len_sec = window_sec * 1.5
@@ -51,14 +54,14 @@ class RingBufferProcessor(AcousticChunkProcessor):
         self._init_csv()
 
         # Async persistence
-        self._save_queue = Queue()
+        self._save_queue = Queue(maxsize=4)        
         self._worker = threading.Thread(target=self._save_worker, daemon=True)
         self._worker.start()
 
     @classmethod
     def from_config(cls, cfg, sensor):
         width_str = cfg.get("window_width") or cfg.get("width", "5m")
-        return cls(
+        return cls(cfg,
             window_sec=timeparse(width_str),
             fs=sensor.fs,
             chunk_size=sensor.chunk_size,
@@ -116,12 +119,31 @@ class RingBufferProcessor(AcousticChunkProcessor):
             "data": stats_snapshot
         })
 
+        self._save_queue.put({
+            "type": "event",
+            "data": stats_snapshot
+        })
+
         # 4. Reset for Next Window (Immediate continuity)
         self.window_start_t = end_t
         self.window_start_chunk = end_chunk + 1
         self.window_id += 1
         self._buffer.clear()
         self._reset_stats()
+        
+    def _emit_window_event(self, stats):
+        payload = {
+            "event": "WINDOW_FINALIZED",
+            "source": self.sensor_id,
+            "isolator": "timewindow",
+            "window_id": f"timewindow_{self.sensor_id}_{stats['start_chunk']}_{stats['end_chunk']}",
+            "data": stats
+        }
+        try:
+            requests.post(self._java_endpoint, json=payload, timeout=0.5)
+        except Exception as e:
+            # Never block DSP
+            pass
 
     # ------------------------------------------------------------------
     # STATS AGGREGATION (Only reads analysis.metadata)
@@ -189,6 +211,10 @@ class RingBufferProcessor(AcousticChunkProcessor):
                         # FIX: Enforce fieldnames so columns align with header
                         writer = csv.DictWriter(f, fieldnames=self.CSV_FIELDS, extrasaction='ignore')
                         writer.writerow(task["data"])
+                
+                elif task["type"] == "event":
+                    self._emit_window_event(task["data"])
+
             except Exception as e:
                 print(f"Error in RingBuffer worker: {e}")
             finally:

@@ -9,3 +9,4 @@ from .TelemtryLogger import TelemtryLogger
 from .TemporalContextProcessor import TemporalContextProcessor
 from .TimeWindowIsolator import TimeWindowIsolator 
 from .WindowIsolator import WindowIsolator
+from .SummaryProcessor import ForensicSummaryProcessor 
