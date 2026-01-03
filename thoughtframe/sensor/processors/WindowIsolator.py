@@ -217,32 +217,27 @@ class WindowIsolator(AcousticChunkProcessor, ABC):
     # ------------------------------------------------------------------
     # HTTP NOTIFICATION (THREADED)
     # ------------------------------------------------------------------
-    def _notify_java(self, event, stats):
+    def _notify_java(self, event: str, stats: dict):
         """
-        Sends JSON payload to DspModule.handleWindowEvent without blocking audio.
+        Sends a full window snapshot to Java.
+        Event type (OPEN/CLOSE) is informational only.
         """
-        
-        # LOGIC FIX: Ensure we send the correct timestamp for the event type
-        # DspManager.java uses the 't' field to update either start_t or end_t
-        if event == "CLOSE":
-            timestamp = stats.get("end_t")
-        else:
-            timestamp = stats.get("start_t")
-
+    
         payload = {
+            "event": event,                 # OPEN | CLOSE
+            "source": f"{self.sensor_id}_{self.cfg.get('name', 'unknown')}",
             "window_id": stats["window_id"],
-            "event": event, # OPEN, CLOSE
-            "t": timestamp,
-            "duration": stats.get("duration_sec", 0),
-            
-            # Source key for Java to parse "beam_id" and "isolator"
-            # e.g. "beam_0_impulse_isolator"
-            "source": f"{self.sensor_id}_{self.cfg.get('name', 'unknown')}"
+            "isolator": self.OP_NAME,
+            "data": stats                  # <-- FULL SNAPSHOT
         }
-
-        # Fire and forget thread
-        t = threading.Thread(target=self._send_request, args=(payload,), daemon=True)
+    
+        t = threading.Thread(
+            target=self._send_request,
+            args=(payload,),
+            daemon=True
+        )
         t.start()
+
 
     def _send_request(self, payload):
         try:

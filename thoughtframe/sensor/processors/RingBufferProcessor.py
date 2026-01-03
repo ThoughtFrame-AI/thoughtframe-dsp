@@ -142,7 +142,7 @@ class RingBufferProcessor(AcousticChunkProcessor):
         try:
             requests.post(self._java_endpoint, json=payload, timeout=0.5)
         except Exception as e:
-            # Never block DSP
+            print(e)
             pass
 
     # ------------------------------------------------------------------

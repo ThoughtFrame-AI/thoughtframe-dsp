@@ -62,64 +62,14 @@
               "min_impulses": 5
             },
             { "op": "telemetry" },
-         {"op": "forensic_summary"}
-            
-          ]
-        },
-        {
-          "op": "guard",
-          "name": "impulses_high",
-          "band": [600, 3000],
-          "pipeline": [
-            { "op": "debug" },
-            { "op": "spectral_features" },
-            { "op": "isolation_forest", "threshold": -0.1 },
-            { "op": "temporal_context", "time": "1h" },
-            {
-              "op": "if_window_isolator",
-              "threshold": -0.15,
-              "min_duration": "1m"
-            },
-            {
-              "op": "impulse_isolator",
-              "threshold_mult": 10.0,
-              "window_sec": 5.0,
-              "min_impulses": 5
-            },
-            { "op": "telemetry" },
-         {"op": "forensic_summary"}
-            
-          ]
-        },
-        {
-          "op": "guard",
-          "name": "impulses_low",
-          "band": [20, 250],
-          "pipeline": [
-            { "op": "debug" },
-            { "op": "spectral_features" },
-            { "op": "isolation_forest", "threshold": -0.1 },
-            { "op": "temporal_context", "time": "1h" },
-            {
-              "op": "if_window_isolator",
-              "threshold": -0.15,
-              "min_duration": "1m"
-            },
-            {
-              "op": "impulse_isolator",
-              "threshold_mult": 10.0,
-              "window_sec": 5.0,
-              "min_impulses": 5
-            },
-            { "op": "telemetry" },
-         {"op": "forensic_summary"}
-            
-          ]
-        },
-        {
+         {"op": "forensic_summary"},
+         {
           "op": "ring_buffer",
           "seconds": 20
+        }   
+          ]
         }
+        
       ]
     }
   ]

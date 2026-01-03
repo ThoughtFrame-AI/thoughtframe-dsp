@@ -6,7 +6,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 
 from thoughtframe.sensor.mesh_config import THOUGHTFRAME_CONFIG
-from thoughtframe.bootstrap import thoughtframe
+from tf_core.bootstrap import thoughtframe
 
 # =========================
 # CONFIG
