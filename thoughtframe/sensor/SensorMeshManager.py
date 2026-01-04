@@ -17,9 +17,12 @@ class SensorMeshManager:
         self.pm = SensorProcessorManager()
         self.sm = SensorManager()
         self.mesh = None
-
+        self.running = False
   
     def start(self, request=None):
+        if self.running:
+            return           
+            
         if request and "mesh" in request:
             cfg = request["mesh"]
             source = "inline"
