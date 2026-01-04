@@ -9,6 +9,8 @@ from tf_core.web.webserver import BaseWebServer
 from thoughtframe.sensor.SensorMeshManager import SensorMeshManager
 from thoughtframe.sensor.mesh_config import THOUGHTFRAME_APP_CONFIG
 from thoughtframe.sensor.web.sensor_module import SensorModule
+from thoughtframe.perception.PerceptionMeshManager import PerceptionMeshManager
+from thoughtframe.perception.web.perception_module import PerceptionModule
 
 
 async def heartbeat():
@@ -24,8 +26,12 @@ async def main():
     ##Add out own 
     thoughtframe.manager.register("sensormeshmanager",lambda: SensorMeshManager(thoughtframe.manager))
     thoughtframe.manager.register("SensorModule",lambda: SensorModule())
-
+    
+    thoughtframe.manager.register("perceptionmeshmanager",lambda: PerceptionMeshManager(thoughtframe.manager))
+    thoughtframe.manager.register("PerceptionModule",lambda: PerceptionModule())
+    
     connection_service = thoughtframe.get("connection")
+   
    
     sensormanager  = thoughtframe.get("sensormeshmanager")
     sensormanager.start()

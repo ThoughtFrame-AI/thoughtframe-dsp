@@ -1,0 +1,42 @@
+{
+  "sources": [
+    {
+      "id": "default",
+      "type": "queue",
+      "pipeline": [
+        { "op": "debug" },
+
+        {
+          "op": "image_decode",
+          "input": "url"
+        },
+
+        {
+          "op": "tensor_contract"
+        },
+
+        {
+          "op": "cnn_inference",
+          "framework": "torchvision",
+          "model": "resnet50",
+          "weights": "imagenet",
+          "device": "cpu",
+          "output": "logits"
+        },
+
+        {
+          "op": "classification_head",
+          "labels": "imagenet",
+          "top_k": 5
+        },
+
+        {
+          "op": "emit_event",
+          "type": "classification"
+        },
+
+        { "op": "telemetry" }
+      ]
+    }
+  ]
+}

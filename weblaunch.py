@@ -6,6 +6,8 @@ import sys
 from tf_core.bootstrap import configure, thoughtframe
 from tf_core.web.webserver import BaseWebServer
 
+from thoughtframe.perception.PerceptionMeshManager import PerceptionMeshManager
+from thoughtframe.perception.web.perception_module import PerceptionModule
 from thoughtframe.sensor.SensorMeshManager import SensorMeshManager
 from thoughtframe.sensor.mesh_config import THOUGHTFRAME_APP_CONFIG
 from thoughtframe.sensor.web.sensor_module import SensorModule
@@ -24,12 +26,10 @@ async def main():
     ##Add out own 
     thoughtframe.manager.register("sensormeshmanager",lambda: SensorMeshManager(thoughtframe.manager))
     thoughtframe.manager.register("SensorModule",lambda: SensorModule())
-
-    connection_service = thoughtframe.get("connection")
    
-    sensormanager  = thoughtframe.get("sensormeshmanager")
-    ##sensormanager.start()
-    
+    thoughtframe.manager.register("perceptionmeshmanager",lambda: PerceptionMeshManager(thoughtframe.manager))
+    thoughtframe.manager.register("PerceptionModule",lambda: PerceptionModule())
+      
     web : BaseWebServer = thoughtframe.get("web")
     await web.start()
 
