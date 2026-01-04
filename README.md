@@ -21,6 +21,26 @@ Primary use cases include:
 
 ---
 
+## What This Looks Like in Practice
+
+### Long-Horizon DSP Segmentation (24h)
+
+![Baseline + Isolation Forest Windows — 24h](docs/images/baseline_baseline_iforest_24h.png)
+
+---
+
+### Window Discovery and Regime Clustering
+
+![Clustering of Detected Windows](docs/images/clustering-windows.png)
+
+---
+
+### Live ThoughtFrame UI (Tactical + Forensic Views)
+
+![Real-Time Acoustic Intelligence UI](docs/images/realtime-web.png)
+
+
+
 ## Relationship to ThoughtFrame Python Runtime
 
 This project depends on:
