@@ -95,7 +95,7 @@ Each chunk is treated as part of an **ordered signal**, not as a timestamped eve
 
 This enables:
 
-- Deterministic replay
+- Deterministic replay (MUCH faster than realtime)
 - Identical live and offline behavior
 - Robust long-duration operation
 - Independence from clock drift
