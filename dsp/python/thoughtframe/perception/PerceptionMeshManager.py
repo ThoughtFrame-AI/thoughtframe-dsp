@@ -5,7 +5,7 @@ from pathlib import Path
 from thoughtframe.perception.PerceptionManager import PerceptionManager
 from thoughtframe.perception.PerceptionProcessorManager import PerceptionProcessorManager
 from thoughtframe.perception.interface import TensorSource, PerceptionPipeline
-
+ 
 
 class PerceptionMeshManager:
     def __init__(self, manager):

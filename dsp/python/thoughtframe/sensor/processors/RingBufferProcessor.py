@@ -29,7 +29,7 @@ class RingBufferProcessor(AcousticChunkProcessor):
         self.sensor_id = sensor_id
         self.window_limit = window_sec
 
-        self._java_endpoint = cfg.get( "guard_endpoint", "http://localhost:8080/thoughtframe/lab/dsp/api/handlewindowevent" )
+        self._java_endpoint = cfg.get( "guard_endpoint", "http://localhost:8080/thoughtframe/frames/dsp/api/handlewindowevent" )
 
         # Buffer sizing (Window + 50% headroom for safety)
         buffer_len_sec = window_sec * 1.5

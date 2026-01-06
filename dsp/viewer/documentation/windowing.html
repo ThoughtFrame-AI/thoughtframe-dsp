@@ -1,0 +1,185 @@
+<section class="mb-5">
+  <h1 class="fw-bold mb-3">Windowing & Events</h1>
+
+  <p class="lead text-muted" style="max-width: 900px;">
+    Windowing is the mechanism by which continuous acoustic streams are
+    transformed into discrete, reviewable units of evidence. Rather than
+    attempting to classify individual samples or chunks in isolation,
+    the system reasons over time-bounded windows with explicit lifecycles.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Why Windowing Exists</h2>
+
+  <p>
+    Raw acoustic data is unbounded. Even per-chunk features are too granular
+    to support meaningful interpretation or human review. Windowing exists
+    to impose structure on time without losing continuity.
+  </p>
+
+  <p>
+    Instead of asking “what is this chunk?”, the system asks:
+  </p>
+
+  <p class="fw-semibold">
+    <em>“Over this span of time, what happened, and how did it evolve?”</em>
+  </p>
+
+  <p>
+    This shift is essential for real-world sensing, where events have duration,
+    onset, decay, and internal variation.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Window Isolators</h2>
+
+  <p>
+    Windowing is implemented by specialized processors called
+    <code>WindowIsolators</code>. These processors observe the stream of
+    chunk-level measurements and propose transitions between window states.
+  </p>
+
+  <p>
+    A window isolator:
+  </p>
+
+  <ul class="ms-3">
+    <li>Maintains internal state across chunks</li>
+    <li>Defines explicit rules for window boundaries</li>
+    <li>Accumulates aggregate statistics over time</li>
+    <li>Persists completed windows as durable records</li>
+  </ul>
+
+  <p class="mt-3">
+    Importantly, isolators do not infer meaning. They segment time according
+    to explicit, inspectable logic.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Window Lifecycle</h2>
+
+  <p>
+    Every window follows a well-defined lifecycle:
+  </p>
+
+  <ul class="ms-3">
+    <li><strong>Start</strong> – a new window is opened at a specific time and chunk</li>
+    <li><strong>Accumulate</strong> – statistics are updated as chunks arrive</li>
+    <li><strong>Close</strong> – the window is finalized based on explicit criteria</li>
+    <li><strong>Persist</strong> – aggregated results are written to disk</li>
+  </ul>
+
+  <p class="mt-3">
+    Lifecycle boundaries are explicit and deterministic. Short or spurious
+    windows may be discarded using minimum duration rules to suppress noise.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Base Window Schema</h2>
+
+  <p>
+    All windows share a canonical schema, ensuring consistency across
+    isolators and pipelines. This schema includes:
+  </p>
+
+  <ul class="ms-3">
+    <li>Unique window identifier</li>
+    <li>Start and end times</li>
+    <li>Start and end chunk indices</li>
+    <li>Duration in seconds and chunks</li>
+    <li>Number of contributing chunks</li>
+    <li>Aggregate acoustic statistics (mean, variance, min, max)</li>
+  </ul>
+
+  <p class="mt-3">
+    Individual isolators may extend this schema with additional fields, but
+    the base lifecycle and timing fields are fixed.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">From Windows to Events</h2>
+
+  <p>
+    A completed window represents a candidate <em>event</em>. At this layer,
+    an event is not a semantic label or classification — it is a bounded
+    region of time with measurable properties.
+  </p>
+
+  <p>
+    Events are therefore:
+  </p>
+
+  <ul class="ms-3">
+    <li>Time-bounded</li>
+    <li>Replayable</li>
+    <li>Comparable across runs</li>
+    <li>Independent of interpretation</li>
+  </ul>
+
+  <p class="mt-3">
+    This definition allows events to be reinterpreted later as new context,
+    models, or human insight becomes available.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Multiple Windowing Strategies</h2>
+
+  <p>
+    Different isolators may be used simultaneously within a pipeline, each
+    capturing different temporal phenomena. For example:
+  </p>
+
+  <ul class="ms-3">
+    <li>Fixed-duration windows for baseline statistics</li>
+    <li>Novelty-driven windows for anomalous activity</li>
+    <li>Impulse windows for transient signals</li>
+    <li>Contextual windows spanning elevated activity</li>
+  </ul>
+
+  <p class="mt-3">
+    Because windows are independent and persisted, overlapping or parallel
+    interpretations do not conflict.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Persistence and Review</h2>
+
+  <p>
+    Completed windows are written immediately as structured records, typically
+    in CSV form. This persistence layer is not optional or best-effort — it is
+    part of the windowing contract.
+  </p>
+
+  <p>
+    Persisted windows enable:
+  </p>
+
+  <ul class="ms-3">
+    <li>Offline analysis and visualization</li>
+    <li>Human review and annotation</li>
+    <li>Cross-run comparison</li>
+    <li>Reprocessing without raw audio</li>
+  </ul>
+</section>
+
+<section>
+  <h2 class="fw-bold mb-3">Why Windows Matter</h2>
+
+  <p>
+    Windowing is the bridge between continuous sensing and structured reasoning.
+    It allows the system to operate indefinitely while still producing discrete,
+    trustworthy units of evidence.
+  </p>
+
+  <p>
+    By making window boundaries explicit and inspectable, the system avoids the
+    ambiguity and irreproducibility common in end-to-end streaming models.
+  </p>
+</section>

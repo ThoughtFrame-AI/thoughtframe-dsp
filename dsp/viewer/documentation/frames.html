@@ -1,0 +1,179 @@
+<section class="mb-5">
+  <h1 class="fw-bold mb-3">Frames & Interpretation</h1>
+
+  <p class="lead text-muted" style="max-width: 900px;">
+    Frames are the interpretation layer that consumes acoustic windows and
+    events produced by the Python runtime. They exist outside the signal
+    processing system and operate exclusively on persisted evidence, not
+    raw audio streams.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Separation of Concerns</h2>
+
+  <p>
+    The acoustic runtime is intentionally limited to evidence production.
+    It does not assign meaning, intent, or consequence to detected activity.
+    Frames exist to handle those responsibilities separately.
+  </p>
+
+  <p>
+    This separation enforces a hard boundary:
+  </p>
+
+  <ul class="ms-3">
+    <li>The Python system measures and segments</li>
+    <li>Frames interpret and reason</li>
+    <li>Humans remain authoritative over conclusions</li>
+  </ul>
+
+  <p class="mt-3">
+    By design, interpretation can evolve without invalidating previously
+    captured evidence.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">What a Frame Represents</h2>
+
+  <p>
+    In this context, a Frame represents a stateful workspace focused on one
+    or more acoustic events. A Frame may span:
+  </p>
+
+  <ul class="ms-3">
+    <li>A single window</li>
+    <li>A sequence of related windows</li>
+    <li>A hypothesis that evolves over time</li>
+  </ul>
+
+  <p class="mt-3">
+    Frames accumulate context as new evidence arrives, allowing interpretations
+    to be revised rather than replaced.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Evidence Consumption</h2>
+
+  <p>
+    Frames ingest structured window records rather than live streams. Each
+    record includes precise timing, aggregate statistics, and optional audio
+    references.
+  </p>
+
+  <p>
+    Because evidence is immutable once written, Frames can:
+  </p>
+
+  <ul class="ms-3">
+    <li>Replay historical events</li>
+    <li>Compare interpretations across runs</li>
+    <li>Apply new reasoning logic to old data</li>
+  </ul>
+
+  <p class="mt-3">
+    This decoupling is essential for auditability and long-term analysis.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Human-in-the-Loop by Design</h2>
+
+  <p>
+    Frames are designed to support human review, not replace it. Analysts
+    interact with Frames by:
+  </p>
+
+  <ul class="ms-3">
+    <li>Reviewing window statistics and timelines</li>
+    <li>Listening to associated audio segments</li>
+    <li>Annotating, tagging, or rejecting interpretations</li>
+    <li>Recording confidence or uncertainty</li>
+  </ul>
+
+  <p class="mt-3">
+    Human conclusions are layered on top of evidence rather than overwriting
+    it. Disagreement and revision are first-class outcomes.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">State and Temporal Reasoning</h2>
+
+  <p>
+    Frames maintain state across time. Rather than producing isolated
+    classifications, they track how interpretations change as additional
+    evidence arrives.
+  </p>
+
+  <p>
+    This enables reasoning patterns such as:
+  </p>
+
+  <ul class="ms-3">
+    <li>Escalation from weak signals to strong hypotheses</li>
+    <li>Decay or dismissal of unsupported interpretations</li>
+    <li>Correlation across multiple events or sensors</li>
+  </ul>
+
+  <p class="mt-3">
+    State is explicit and inspectable, avoiding hidden model memory.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Multiple Interpretations</h2>
+
+  <p>
+    Because Frames do not modify underlying evidence, multiple interpretations
+    may coexist. Different Frames may analyze the same windows using different
+    assumptions, policies, or levels of confidence.
+  </p>
+
+  <p>
+    This allows the system to support:
+  </p>
+
+  <ul class="ms-3">
+    <li>Parallel analytic workflows</li>
+    <li>Training and evaluation scenarios</li>
+    <li>Post-hoc analysis with updated criteria</li>
+  </ul>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Boundary to Action</h2>
+
+  <p>
+    Frames may inform downstream actions — alerts, reports, or integrations —
+    but they do not directly control the acoustic runtime.
+  </p>
+
+  <p>
+    Any action taken is traceable back to:
+  </p>
+
+  <ul class="ms-3">
+    <li>The original signal</li>
+    <li>The windowed evidence</li>
+    <li>The Frame state at the time of decision</li>
+    <li>Human input, if present</li>
+  </ul>
+</section>
+
+<section>
+  <h2 class="fw-bold mb-3">Why This Matters</h2>
+
+  <p>
+    By separating evidence production from interpretation, the system remains
+    adaptable without becoming opaque. Frames allow reasoning to evolve while
+    preserving the integrity of the underlying signal record.
+  </p>
+
+  <p>
+    This design is critical in real-time sensing environments where trust,
+    accountability, and hindsight matter as much as responsiveness.
+  </p>
+</section>

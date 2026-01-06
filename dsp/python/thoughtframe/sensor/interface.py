@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import AsyncIterator
 
-import numpy as np
+import librosa
 
+import numpy as np
 
 
 class AcousticAnalysis:
@@ -16,7 +17,10 @@ class AcousticAnalysis:
         self.flags: set[str] = set()   
         self._fft = None
         self._fft_freqs = None
-    
+        self._stft = None
+        self._mel = None
+        self._log_mel = None
+        
     @property
     def chunk_index(self):
         return self.node.chunk_index
@@ -51,6 +55,35 @@ class AcousticAnalysis:
         _ = self.fft
         return self._fft_freqs
     
+    @property
+    def stft(self):
+        if self._stft is None:
+            self._stft = librosa.stft(
+                self.chunk,
+                n_fft=512,
+                hop_length=256
+            )
+        return self._stft
+    
+    @property
+    def mel(self):
+        if self._mel is None:
+            S_mag = np.abs(self.stft) ** 2
+            self._mel = librosa.feature.melspectrogram(
+                S=S_mag,
+                sr=self.node.sensor.fs,
+                n_mels=40,
+                fmin=50,
+                fmax=self.node.sensor.fs / 2
+            )
+        return self._mel
+
+    @property
+    def log_mel(self):
+        if self._log_mel is None:
+            self._log_mel = librosa.power_to_db(self.mel)
+        return self._log_mel
+
 
 class AcousticChunkProcessor(ABC):
     OP_NAME: str | None = None

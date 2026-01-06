@@ -1,0 +1,14 @@
+<page>
+	<property name="virtual">true</property>
+	 	<!-- Logs in a user with a cookie -->
+	<path-action name="Admin.autoLogin"  alltypes="true" />
+	<path-action name="Admin.loadPermissions" alltypes="true" />
+	<path-action name="Admin.allowViewing" alltypes="true" />
+	
+	<property name="downloadrootdirectory">/${applicationid}/frames/dsp/viewer/downloads</property>
+	<property name="newpathprefix">/WEB-INF/data/${catalogid}/dsp</property>
+	
+	<layout/>
+	<inner-layout/>
+	<generator name="downloadGenerator"/>
+</page>

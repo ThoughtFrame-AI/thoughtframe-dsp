@@ -1,0 +1,235 @@
+<div class="container-fluid py-3 bg-white" id="tf-acoustic-dashboard">
+
+  <!-- ===================================================== -->
+  <!-- Header -->
+  <!-- ===================================================== -->
+  <div class="row align-items-center mb-3 border-bottom pb-2">
+    <div class="col">
+      <h3 class="mb-0 fw-bold">
+        <i class="bi bi-radar"></i> Acoustic Intelligence
+      </h3>
+      <div class="text-muted small">
+        Beam 0 · Status:
+        <span class="text-success fw-bold" id="system-status">
+          $dsp.getStatus()
+        </span>
+      </div>
+    </div>
+
+    <div class="col-auto text-end border-start ps-3">
+      <div class="small text-muted text-uppercase x-small fw-bold">
+        System Clock
+      </div>
+      <div class="fw-bold font-monospace text-primary" id="sync-clock">
+        --:--:--
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- ALWAYS-ON TACTICAL SPECTROGRAM -->
+  <!-- ===================================================== -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm border-primary">
+        <div class="card-header py-1 bg-primary bg-opacity-10
+                    d-flex justify-content-between align-items-center">
+          <span class="x-small fw-bold text-primary text-uppercase tracking-wider">
+            Tactical Sliding Spectrogram (5m)
+          </span>
+          <span class="badge bg-primary px-2" style="font-size:0.6rem;">
+            LIVE
+          </span>
+        </div>
+
+        <div class="card-body p-1 bg-black text-center">
+          <img
+            id="spectrogram-img"
+            class="img-fluid forensic-img"
+            data-type="spectrogram"
+            style="max-height:280px;width:100%;object-fit:contain;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- OBSERVER CONTROLS -->
+  <!-- ===================================================== -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="btn-group shadow-sm" role="group">
+        <button class="btn btn-outline-primary observer-btn active"
+                data-observer="baseline">
+          BASELINE
+        </button>
+        <button class="btn btn-outline-primary observer-btn"
+                data-observer="impulses_high">
+          IMPULSES HIGH
+        </button>
+        <button class="btn btn-outline-primary observer-btn"
+                data-observer="impulses_low">
+          IMPULSES LOW
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- HORIZON TABS -->
+  <!-- ===================================================== -->
+  <ul class="nav nav-tabs mb-3" id="horizon-tabs">
+    <li class="nav-item">
+      <button class="nav-link active" data-horizon="5m">
+        5m <span class="d-none d-sm-inline">Tactical</span>
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" data-horizon="1h">
+        1h <span class="d-none d-sm-inline">Forensic</span>
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" data-horizon="24h">
+        24h <span class="d-none d-sm-inline">Metrology</span>
+      </button>
+    </li>
+  </ul>
+
+  <!-- ===================================================== -->
+  <!-- ANALYTICAL OVERLAYS -->
+  <!-- ===================================================== -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header py-1 x-small fw-bold text-muted">
+          IMPULSE ISOLATOR OVERLAYS
+        </div>
+        <div class="card-body p-1">
+          <img class="img-fluid forensic-img border rounded"
+               id="impulse-img"
+               data-type="impulses">
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header py-1 x-small fw-bold text-muted">
+          ISOLATION FOREST WINDOWS
+        </div>
+        <div class="card-body p-1">
+          <img class="img-fluid forensic-img border rounded"
+               id="iforest-img"
+               data-type="iforest">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- RAW METRICS -->
+  <!-- ===================================================== -->
+  <details open class="mb-3">
+    <summary class="fw-bold small text-muted mb-2 border-bottom pb-1"
+             style="cursor:pointer;list-style:none;">
+      RAW TELEMETRY METRICS
+    </summary>
+
+    <div class="row g-3 py-2">
+      <div class="col-md-4">
+        <img class="img-fluid forensic-img metric-img border rounded"
+             data-metric="rms">
+      </div>
+      <div class="col-md-4">
+        <img class="img-fluid forensic-img metric-img border rounded"
+             data-metric="centroid">
+      </div>
+      <div class="col-md-4">
+        <img class="img-fluid forensic-img metric-img border rounded"
+             data-metric="iforest">
+      </div>
+    </div>
+  </details>
+</div>
+
+<script>
+(function () {
+
+  let observer = "baseline";
+  let horizon  = "5m";
+  let zoomOpen = false;
+
+  const basePath =
+    `$apphome/frames/dsp/viewer/downloads/beam_0/forensics/`;
+
+  function url(name) {
+    return `${basePath}${name}?t=${Date.now()}`;
+  }
+
+  /* -------------------------------------------
+   * LIVE SPECTROGRAM (independent)
+   * ----------------------------------------- */
+  function refreshSpectrogram() {
+    const img = document.getElementById("spectrogram-img");
+    if (!img) return;
+    img.src = url(`baseline_spectrogram_5m.png`);
+  }
+
+  /* -------------------------------------------
+   * FORENSIC PLOTS (observer + horizon)
+   * ----------------------------------------- */
+  function refreshForensics() {
+    if (zoomOpen) return;
+
+    document.getElementById("sync-clock")
+      .innerText = new Date().toLocaleTimeString();
+
+    document.getElementById("impulse-img").src =
+      url(`${observer}_baseline_impulses_${horizon}.png`);
+
+    document.getElementById("iforest-img").src =
+      url(`${observer}_baseline_iforest_${horizon}.png`);
+
+    document.querySelectorAll(".metric-img").forEach(el => {
+      const m = el.dataset.metric;
+      el.src = url(`${observer}_${m}_${horizon}.png`);
+    });
+  }
+
+  /* -------------------------------------------
+   * CONTROLS
+   * ----------------------------------------- */
+  document.querySelectorAll(".observer-btn").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".observer-btn")
+        .forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      observer = btn.dataset.observer;
+      refreshForensics();
+    };
+  });
+
+  document.querySelectorAll("#horizon-tabs button").forEach(tab => {
+    tab.onclick = () => {
+      document.querySelectorAll("#horizon-tabs button")
+        .forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      horizon = tab.dataset.horizon;
+      refreshForensics();
+    };
+  });
+
+  /* -------------------------------------------
+   * INIT
+   * ----------------------------------------- */
+  refreshSpectrogram();
+  refreshForensics();
+
+  setInterval(refreshSpectrogram, 10_000); // fast
+  setInterval(refreshForensics, 30_000);   // slow
+
+})();
+</script>
+
+

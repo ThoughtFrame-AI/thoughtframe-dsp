@@ -1,0 +1,195 @@
+<section class="mb-5">
+  <h1 class="fw-bold mb-3">Pipelines & Processors</h1>
+
+  <p class="lead text-muted" style="max-width: 900px;">
+    Analysis in the acoustic system is performed by explicit, ordered pipelines
+    composed of small processing units. Pipelines transform raw audio chunks
+    into structured measurements and evidence without controlling execution
+    flow or interpretation.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Pipeline Model</h2>
+
+  <p>
+    A pipeline is an ordered list of processors applied to every incoming
+    audio chunk. Each processor performs a single, well-defined operation
+    and records its results into a shared analysis context.
+  </p>
+
+  <p>
+    Pipelines are:
+  </p>
+
+  <ul class="ms-3">
+    <li>Deterministic</li>
+    <li>Stateless with respect to control flow</li>
+    <li>Composable from configuration</li>
+    <li>Safe to run continuously</li>
+  </ul>
+
+  <p class="mt-3">
+    This model avoids implicit branching, hidden state transitions, or
+    processor-driven execution logic.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">AcousticChunkProcessor</h2>
+
+  <p>
+    All processors implement a common interface. Each processor is invoked
+    once per chunk and receives:
+  </p>
+
+  <ul class="ms-3">
+    <li>The raw audio chunk</li>
+    <li>A shared <code>AcousticAnalysis</code> context</li>
+  </ul>
+
+  <p class="mt-3">
+    Processors may:
+  </p>
+
+  <ul class="ms-3">
+    <li>Read values written by earlier processors</li>
+    <li>Write derived values into metadata</li>
+    <li>Accumulate internal rolling state</li>
+  </ul>
+
+  <p class="mt-3">
+    Processors may <strong>not</strong>:
+  </p>
+
+  <ul class="ms-3">
+    <li>Skip downstream processors</li>
+    <li>Alter pipeline order</li>
+    <li>Trigger side effects outside their responsibility</li>
+  </ul>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Shared Analysis Context</h2>
+
+  <p>
+    Each chunk is accompanied by an <code>AcousticAnalysis</code> object that
+    persists for the lifetime of that chunk’s processing.
+  </p>
+
+  <p>
+    This context includes:
+  </p>
+
+  <ul class="ms-3">
+    <li>FFT and frequency bins</li>
+    <li>Derived spectral features</li>
+    <li>Rolling statistics</li>
+    <li>Novelty or anomaly scores</li>
+    <li>Temporal metadata (chunk index, time)</li>
+  </ul>
+
+  <p class="mt-3">
+    The analysis context is the sole mechanism by which processors communicate.
+    There is no hidden coupling or out-of-band signaling.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Typical Processor Categories</h2>
+
+  <p>
+    Pipelines are typically composed from several classes of processors:
+  </p>
+
+  <h5 class="fw-bold mt-3">Feature Extraction</h5>
+  <p class="small">
+    Compute per-chunk measurements such as RMS energy, spectral centroid,
+    bandwidth, rolloff, and flatness.
+  </p>
+
+  <h5 class="fw-bold mt-3">Temporal Context</h5>
+  <p class="small">
+    Maintain rolling means, variances, and long-horizon context across
+    chunks using explicit decay timescales.
+  </p>
+
+  <h5 class="fw-bold mt-3">Statistical Novelty</h5>
+  <p class="small">
+    Apply unsupervised scoring (e.g. Isolation Forest) to identify deviations
+    from learned baselines without assigning semantic meaning.
+  </p>
+
+  <h5 class="fw-bold mt-3">Guards & Filters</h5>
+  <p class="small">
+    Restrict downstream processing to specific frequency bands or conditions
+    without altering upstream measurements.
+  </p>
+
+  <h5 class="fw-bold mt-3">Windowing & Segmentation</h5>
+  <p class="small">
+    Accumulate chunk-level measurements into bounded temporal windows and
+    persist aggregated statistics.
+  </p>
+
+  <h5 class="fw-bold mt-3">Persistence & Telemetry</h5>
+  <p class="small">
+    Write analysis results to disk or stream them to external consumers.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Configuration-Driven Assembly</h2>
+
+  <p>
+    Pipelines are assembled from declarative configuration rather than code.
+    Each processor is referenced by name and initialized with explicit
+    parameters.
+  </p>
+
+  <div class="p-3 border rounded bg-light">
+    <pre class="mb-0 small">
+PIPELINE_BASE = [
+  {"op": "spectral_features"},
+  {"op": "temporal_context", "time": "30s"},
+  {"op": "isolation_forest", "threshold": -0.1},
+  {"op": "window_isolator"},
+  {"op": "telemetry"}
+]
+    </pre>
+  </div>
+
+  <p class="mt-3">
+    This approach allows pipelines to be modified, extended, or compared
+    without recompilation or redeployment.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Determinism and Ordering</h2>
+
+  <p>
+    Pipeline execution order is fixed and visible. Given the same input stream
+    and configuration, the pipeline will produce identical outputs.
+  </p>
+
+  <p>
+    There is no implicit parallelism inside a pipeline. Parallelism is achieved
+    by running multiple pipelines over the same synchronized data stream.
+  </p>
+</section>
+
+<section>
+  <h2 class="fw-bold mb-3">Why This Design</h2>
+
+  <p>
+    By separating ingestion, analysis, segmentation, and persistence into
+    explicit processors, the system remains understandable under load.
+  </p>
+
+  <p>
+    Every measurement can be traced to a specific processor, configuration,
+    and chunk of input data — a requirement for real-time systems that must
+    be trusted, audited, and revisited after the fact.
+  </p>
+</section>

@@ -1,0 +1,20 @@
+{
+  
+  "items": [
+  	#foreach($hit in $hits)
+    {
+      "url": "http://localhost:8080/thoughtframe/$asset.sourcepath/tensor.png",
+      "asset_id": "123",
+      "contract": {
+        "shape": [3, 224, 224],
+        "layout": "chw",
+        "dtype": "float32",
+        "model_prep": "resnet50_v1"
+      },
+      "labels": {
+        "ground_truth": "cat"
+      }
+    }
+    #end
+  ]
+}

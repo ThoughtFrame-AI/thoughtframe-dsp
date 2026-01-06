@@ -1,0 +1,133 @@
+#set($hits = $testbench.getSearcher("dspwindow").query().exact("isolator", "if_window_isolator").sort("start_chunk").search())
+
+<div class="container-fluid">
+
+  <h4 class="mb-3">DSP Windows — IF Isolator</h4>
+
+  <div class="row g-3 mb-4">
+
+    <!-- BASELINE -->
+    <div class="col-md-4">
+      <div class="card h-100 shadow">
+        <div class="card-body p-2 text-center">
+          <div class="small text-uppercase text-muted mb-1">
+            24h Baseline
+          </div>
+          <img
+            src="$apphome/frames/dsp/viewer/downloads/beam_0/forensics/baseline_baseline_iforest_24h.png"
+            class="img-fluid border rounded"
+            style="max-height:220px;object-fit:contain;">
+        </div>
+      </div>
+    </div>
+
+    <!-- KMEANS TIME -->
+    <div class="col-md-4">
+      <div class="card h-100 shadow">
+        <div class="card-body p-2 text-center">
+          <div class="small text-uppercase text-muted mb-1">
+            K-Means · Time
+          </div>
+          <img
+            src="$apphome/frames/dsp/viewer/downloads/beam_0/forensics/kmeans/kmeans_time.png"
+            class="img-fluid border rounded"
+            style="max-height:220px;object-fit:contain;">
+        </div>
+      </div>
+    </div>
+
+    <!-- KMEANS FEATURES -->
+    <div class="col-md-4">
+      <div class="card h-100 shadow">
+        <div class="card-body p-2 text-center">
+          <div class="small text-uppercase text-muted mb-1">
+            K-Means · Feature Space
+          </div>
+          <img
+            src="$apphome/frames/dsp/viewer/downloads/beam_0/forensics/kmeans/kmeans_features.png"
+            class="img-fluid border rounded"
+            style="max-height:220px;object-fit:contain;">
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="container-fluid">
+
+  <h5 class="mt-4 mb-3 text-muted">Detected Windows</h5>
+
+  <div class="row g-3">
+
+  #foreach($hit in $hits)
+    #set($beam = "beam_0")
+    #set($startT = $hit.start_t)
+    #set($endT = $hit.end_t)
+    #set($c = $hit.cluster)
+    #set($pill = "secondary")
+    #if($c == "0") #set($pill = "primary") #end
+    #if($c == "1") #set($pill = "success") #end
+    #if($c == "2") #set($pill = "warning") #end
+    #if($c == "3") #set($pill = "danger") #end
+
+    <div class="col-md-3">
+
+      <div class="card h-100 shadow">
+        <div class="card-body">
+
+          <!-- Header -->
+          <div class="mb-2 d-flex justify-content-between align-items-start">
+            <div>
+              <strong>Beam:</strong><br/>
+              <small class="text-muted">
+                t = $startT → $endT
+              </small>
+            </div>
+            <span class="badge rounded-pill bg-$pill"
+                  style="font-size:0.65rem;">
+              C$hit.cluster
+            </span>
+          </div>
+
+          <!-- Audio -->
+          <audio controls preload="none" class="mt-1" style="width:100%;">
+            <source
+              src="$apphome/frames/dsp/viewer/audio/window.flac?beam=$beam&start_s=$startT&end_s=$endT"
+              type="audio/flac">
+          </audio>
+
+          <!-- Spectrogram -->
+          <div class="mt-2 text-center">
+            <img
+              src="$apphome/frames/dsp/viewer/downloads/beam_0/forensics/spectrograms/${hit.id}.png"
+              class="img-fluid border rounded"
+              style="max-height:140px;width:100%;object-fit:contain;"
+              loading="lazy">
+          </div>
+
+          <!-- Stats -->
+          <div class="row mt-2 small text-muted lh-sm">
+            <div class="col-6">
+              <strong>RMS μ:</strong> $hit.rms_mean<br/>
+              <strong>σ²:</strong> $hit.rms_var
+            </div>
+            <div class="col-6">
+              <strong>Min:</strong> $hit.rms_min<br/>
+              <strong>Max:</strong> $hit.rms_max
+            </div>
+            <div class="col-12 mt-1">
+              <strong>Centroid μ:</strong> $hit.centroid_mean<br/>
+              <strong>σ²:</strong> $hit.centroid_var
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  #end
+
+  </div>
+</div>

@@ -1,0 +1,6 @@
+<page>
+	<path-action name="DspModule.loadDsp" />
+	<inner-layout>${dsphome}/innerlayout.html</inner-layout>
+	<property name="dsphome">/${applicationid}/frames/dsp/viewer</property>
+
+</page>

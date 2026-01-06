@@ -1,0 +1,180 @@
+<section class="mb-5">
+  <h1 class="fw-bold mb-3">System Architecture</h1>
+
+  <p class="lead text-muted" style="max-width: 900px;">
+    The acoustic system is implemented as a high-performance, asynchronous
+    Python runtime designed for continuous signal ingestion, deterministic
+    analysis, and reliable evidence generation. It is optimized for
+    real-time operation, replayability, and long-running deployments.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Design Goals</h2>
+
+  <ul class="ms-3">
+    <li>Operate continuously on live or replayed acoustic streams</li>
+    <li>Preserve strict time and ordering semantics</li>
+    <li>Support parallel analysis without race conditions</li>
+    <li>Remain fully deterministic and inspectable</li>
+    <li>Produce durable evidence suitable for downstream interpretation</li>
+  </ul>
+
+  <p class="mt-3">
+    The system deliberately avoids opaque end-to-end models in favor of
+    explicit pipelines composed of small, testable processing units.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Runtime Topology</h2>
+
+  <p>
+    At runtime, the system forms a directed flow of data from sensors to
+    analysis pipelines. Each stage has a single responsibility and
+    well-defined inputs and outputs.
+  </p>
+
+  <div class="p-3 border rounded bg-light">
+    <pre class="mb-0 small">
+AcousticSensor
+   ↓
+ArrayCoordinator (optional)
+   ↓
+AcousticPipeline
+   ├─ Feature Processors
+   ├─ Statistical / ML Processors
+   ├─ Window Isolators
+   └─ Persistence / Telemetry
+    </pre>
+  </div>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Sensor Ingestion</h2>
+
+  <p>
+    All acoustic input is abstracted behind the <code>AcousticSensor</code>
+    interface. Sensors emit fixed-size, time-ordered chunks of audio samples
+    using asynchronous generators.
+  </p>
+
+  <p>
+    This abstraction allows the same analysis pipelines to operate on:
+  </p>
+
+  <ul class="ms-3">
+    <li>Live hardware inputs (e.g. ALSA via FFmpeg)</li>
+    <li>Recorded audio files (WAV, FLAC)</li>
+    <li>Network or simulated streams</li>
+  </ul>
+
+  <p class="mt-3">
+    Ingest uses FFmpeg as a universal capture layer, ensuring consistent
+    decoding, buffering, and sample formats across environments.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Synchronization & Array Coordination</h2>
+
+  <p>
+    For multi-channel or distributed sensors, the system optionally inserts
+    an <code>ArrayCoordinator</code> stage. This component enforces
+    sample-accurate alignment across streams before any downstream analysis
+    occurs.
+  </p>
+
+  <p>
+    Synchronization is explicit and blocking by design: analysis only proceeds
+    once all required channels have produced a corresponding chunk. This
+    prevents silent drift, misalignment, or temporal ambiguity.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Processing Pipelines</h2>
+
+  <p>
+    Analysis is performed by <code>AcousticPipeline</code> instances, each of
+    which is an ordered chain of <code>AcousticChunkProcessor</code> objects.
+  </p>
+
+  <p>
+    Each processor:
+  </p>
+
+  <ul class="ms-3">
+    <li>Receives the raw audio chunk</li>
+    <li>Reads shared analysis context</li>
+    <li>Writes derived values into metadata</li>
+    <li>Does not control execution flow</li>
+  </ul>
+
+  <p class="mt-3">
+    Processors are intentionally small and composable. Examples include:
+    spectral feature extraction, rolling statistics, novelty scoring, and
+    temporal context tracking.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Windowing & Event Segmentation</h2>
+
+  <p>
+    Window isolators operate within the pipeline to segment continuous streams
+    into meaningful temporal regions. Window boundaries are determined by
+    explicit logic, not learned behavior.
+  </p>
+
+  <p>
+    Each window:
+  </p>
+
+  <ul class="ms-3">
+    <li>Has a unique identifier and lifecycle</li>
+    <li>Accumulates aggregate statistics</li>
+    <li>Records precise start and end times</li>
+    <li>Is persisted as durable evidence</li>
+  </ul>
+
+  <p class="mt-3">
+    Windowing transforms unbounded streams into discrete, reviewable units
+    without losing temporal context.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Persistence & Telemetry</h2>
+
+  <p>
+    The system writes evidence continuously as it runs. This includes:
+  </p>
+
+  <ul class="ms-3">
+    <li>Per-window CSV records</li>
+    <li>Rolling telemetry logs</li>
+    <li>Optional audio snapshots or buffers</li>
+  </ul>
+
+  <p class="mt-3">
+    Persistence is synchronous and explicit. No intermediate results are
+    silently discarded. This enables replay, offline analysis, and
+    reinterpretation without reprocessing raw audio.
+  </p>
+</section>
+
+<section>
+  <h2 class="fw-bold mb-3">Boundary to Interpretation</h2>
+
+  <p>
+    The Python runtime stops at evidence production. It does not assign
+    meaning, intent, or consequence to detected events.
+  </p>
+
+  <p>
+    All higher-level interpretation, human review, and long-term reasoning
+    occurs outside this layer. This separation keeps the acoustic system
+    deterministic, testable, and safe to operate in real-time environments.
+  </p>
+</section>

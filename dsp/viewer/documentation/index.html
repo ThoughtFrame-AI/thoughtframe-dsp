@@ -1,0 +1,123 @@
+<section class="mb-5">
+  <h1 class="fw-bold mb-3">Acoustic & Sonar Systems Overview</h1>
+
+  <p class="lead text-muted" style="max-width: 900px;">
+    This project is a real-time acoustic processing and interpretation system
+    built as a <strong>field-level proof of concept</strong> for ThoughtFrame.
+    It demonstrates how deterministic pipelines, explicit time semantics, and
+    stateful <em>Frames</em> can operate on continuous physical signals —
+    not documents, prompts, or static datasets.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Why This Exists</h2>
+
+  <p>
+    Most AI systems are designed for static worlds: a document goes in, an answer
+    comes out. Real-world sensing does not work that way. Acoustic systems operate
+    continuously, under noise, latency, and uncertainty, with no opportunity to
+    “retry” a missed event.
+  </p>
+
+  <p>
+    This project exists to answer a simple question:
+  </p>
+
+  <p class="fw-semibold">
+    <em>Can ThoughtFrame reason about the physical world in real time, without
+    sacrificing determinism, auditability, or human control?</em>
+  </p>
+
+  <p>
+    The answer, demonstrated here, is yes — by cleanly separating
+    <strong>signal processing</strong> from <strong>interpretation</strong>,
+    and by treating time, state, and evidence as first-class concepts.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">System Philosophy</h2>
+
+  <ul class="ms-3">
+    <li><strong>DSP never decides.</strong> It produces measurements, features, and candidate events.</li>
+    <li><strong>ThoughtFrame never guesses.</strong> Interpretation is explicit, stateful, and replayable.</li>
+    <li><strong>Humans remain authoritative.</strong> The system is built for review, disagreement, and revision.</li>
+    <li><strong>Time is real.</strong> Every decision is anchored to clocks, windows, and duration.</li>
+  </ul>
+
+  <p class="mt-3">
+    This architecture avoids the common failure modes of end-to-end ML systems:
+    opaque decisions, irreproducible behavior, and loss of context over time.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">High-Level Architecture</h2>
+
+  <p>
+    The system is intentionally split into two layers:
+  </p>
+
+  <div class="row g-4 mt-2">
+    <div class="col-md-6">
+      <div class="p-3 border rounded h-100">
+        <h5 class="fw-bold">Signal & DSP Layer</h5>
+        <ul class="small mb-0">
+          <li>Asynchronous sensor ingestion (live or replayed)</li>
+          <li>Sample-accurate time alignment</li>
+          <li>Spectral and statistical feature extraction</li>
+          <li>Unsupervised novelty scoring</li>
+          <li>Deterministic window segmentation</li>
+          <li>Evidence persistence (CSV, audio slices)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="p-3 border rounded h-100">
+        <h5 class="fw-bold">ThoughtFrame Layer</h5>
+        <ul class="small mb-0">
+          <li>Frames representing hypotheses and interpretations</li>
+          <li>Stateful reasoning over evolving evidence</li>
+          <li>Human review and annotation workflows</li>
+          <li>Replay and reinterpretation of past events</li>
+          <li>Durable memory across sessions and deployments</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">What This Is (and Is Not)</h2>
+
+  <ul class="ms-3">
+    <li>This is <strong>not</strong> an autonomous detection or targeting system.</li>
+    <li>This is <strong>not</strong> a black-box ML classifier.</li>
+    <li>This is <strong>not</strong> a dashboard that forgets the past.</li>
+  </ul>
+
+  <p class="mt-3">
+    It <strong>is</strong> a system for producing trustworthy, replayable
+    acoustic evidence and reasoning over it safely — whether the application
+    is sonar analysis, industrial monitoring, environmental sensing, or any
+    other domain where signals unfold in time.
+  </p>
+</section>
+
+<section>
+  <h2 class="fw-bold mb-3">Why This Matters for ThoughtFrame</h2>
+
+  <p>
+    This project proves that ThoughtFrame is not limited to text or chat-based AI.
+    The same architectural primitives — deterministic state machines, durable
+    memory, explicit boundaries between computation and interpretation — apply
+    just as well to the physical world.
+  </p>
+
+  <p>
+    If ThoughtFrame can operate here, under real clocks and noisy sensors,
+    it can operate anywhere.
+  </p>
+</section>

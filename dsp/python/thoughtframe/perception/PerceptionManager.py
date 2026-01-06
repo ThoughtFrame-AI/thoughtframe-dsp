@@ -9,7 +9,7 @@ class PerceptionManager:
 
     def register(self, name, factory):
         self._factories[name] = factory
-
+ 
     def createSource(self, cfg):
         source_type = cfg["type"]
         if source_type not in self._factories:

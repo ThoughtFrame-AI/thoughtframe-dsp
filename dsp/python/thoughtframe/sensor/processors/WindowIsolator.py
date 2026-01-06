@@ -34,7 +34,7 @@ class WindowIsolator(AcousticChunkProcessor, ABC):
         
         # --- Notification Setup ---
         # Matches DspModule.handleWindowEvent
-        self.notify_url = cfg.get("notify_url", "http://localhost:8080/thoughtframe/lab/dsp/api/handlewindowevent") 
+        self.notify_url = cfg.get("notify_url", "http://localhost:8080/thoughtframe/frames/dsp/api/handlewindowevent") 
         self.notify_enabled = cfg.get("notify", True) # Default to True for now
 
         # --- Window Lifecycle ---

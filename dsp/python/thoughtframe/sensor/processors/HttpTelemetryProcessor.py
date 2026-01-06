@@ -15,7 +15,7 @@ class HttpTelemetryProcessor(AcousticChunkProcessor):
         self.sensor_id = getattr(sensor, "sensor_id", "unknown")
         
         # Matches DspModule.java handleTelemetry -> DspManager.handleSensorTelemetry
-        self.url = cfg.get("url", "http://localhost:8080/thoughtframe/lab/dsp/api/handletelemetry")
+        self.url = cfg.get("url", "http://localhost:8080/thoughtframe/frames/dsp/api/handletelemetry")
         
         # Batching settings (Java performs a bulk save, so bigger batches = less DB locking)
         self.batch_size = int(cfg.get("batch_size", 50)) 

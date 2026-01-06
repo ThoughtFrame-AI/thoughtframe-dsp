@@ -1,0 +1,162 @@
+<section class="mb-5">
+  <h1 class="fw-bold mb-3">Real-Time Sonar Project</h1>
+
+  <p class="lead text-muted" style="max-width: 900px;">
+    This project is a real-time sonar and acoustic monitoring deployment built
+    as a field-level proof of concept for the ThoughtFrame architecture. It
+    demonstrates how deterministic DSP pipelines, explicit windowing, and
+    stateful interpretation operate under real-world conditions.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Project Context</h2>
+
+  <p>
+    Unlike offline analysis or batch processing, sonar systems operate
+    continuously. Signals arrive under noise, latency, and environmental
+    variability. Events cannot be paused, retried, or replayed in the moment.
+  </p>
+
+  <p>
+    The goal of this project is not autonomous classification, but reliable
+    <strong>event capture and interpretation</strong> over time, with humans
+    kept in the decision loop.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Deployment Overview</h2>
+
+  <p>
+    The system runs as a long-lived Python process ingesting one or more
+    hydrophone channels. Audio is captured or replayed through FFmpeg and
+    processed in fixed-size chunks.
+  </p>
+
+  <ul class="ms-3">
+    <li>Continuous audio ingestion</li>
+    <li>Optional multi-sensor synchronization</li>
+    <li>Parallel analysis pipelines</li>
+    <li>Persistent window and telemetry output</li>
+  </ul>
+
+  <p class="mt-3">
+    All outputs are written incrementally, allowing the system to be stopped
+    and restarted without losing historical evidence.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">What the System Detects</h2>
+
+  <p>
+    At the DSP layer, the system does not attempt semantic labeling. Instead,
+    it identifies candidate regions of interest based on measurable properties:
+  </p>
+
+  <ul class="ms-3">
+    <li>Changes in spectral energy and distribution</li>
+    <li>Transient impulses and bursts</li>
+    <li>Sustained deviations from learned baselines</li>
+    <li>Temporal structure and duration</li>
+  </ul>
+
+  <p class="mt-3">
+    These regions are captured as windows and persisted as structured evidence.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">From Windows to Interpretation</h2>
+
+  <p>
+    Window records are consumed by Frames outside the DSP runtime. In the sonar
+    context, Frames may represent:
+  </p>
+
+  <ul class="ms-3">
+    <li>A single acoustic event under review</li>
+    <li>A sequence of related detections</li>
+    <li>A working hypothesis about ongoing activity</li>
+  </ul>
+
+  <p class="mt-3">
+    Frames accumulate context as new windows arrive, allowing interpretations
+    to strengthen, weaken, or change over time.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Human Review Workflow</h2>
+
+  <p>
+    Analysts interact with the system through persisted artifacts rather than
+    live streams. Typical review includes:
+  </p>
+
+  <ul class="ms-3">
+    <li>Inspecting window timelines and statistics</li>
+    <li>Listening to extracted audio segments</li>
+    <li>Annotating events or dismissing noise</li>
+    <li>Recording uncertainty or confidence</li>
+  </ul>
+
+  <p class="mt-3">
+    Because evidence is immutable, conclusions can be revisited later without
+    reprocessing raw audio.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Operational Properties</h2>
+
+  <ul class="ms-3">
+    <li>Runs indefinitely with bounded memory usage</li>
+    <li>Deterministic behavior given identical inputs</li>
+    <li>Graceful restart and replay</li>
+    <li>No hidden state inside models</li>
+  </ul>
+
+  <p class="mt-3">
+    These properties are essential in environments where auditability and
+    trust are as important as responsiveness.
+  </p>
+</section>
+
+<section class="mb-5">
+  <h2 class="fw-bold mb-3">Why This Is a ThoughtFrame Case Study</h2>
+
+  <p>
+    This sonar deployment exercises the same architectural principles used
+    elsewhere in ThoughtFrame:
+  </p>
+
+  <ul class="ms-3">
+    <li>Explicit state rather than implicit model memory</li>
+    <li>Durable evidence over transient predictions</li>
+    <li>Human authority over automated suggestions</li>
+    <li>Reasoning that evolves over time</li>
+  </ul>
+
+  <p class="mt-3">
+    The only difference is the input modality. Instead of documents or chat
+    logs, the system reasons over physical signals unfolding in real time.
+  </p>
+</section>
+
+<section>
+  <h2 class="fw-bold mb-3">Broader Implications</h2>
+
+  <p>
+    While developed for sonar and acoustic monitoring, this project serves as
+    a reference architecture for any domain involving continuous sensing:
+    industrial monitoring, environmental data, infrastructure health, or
+    safety systems.
+  </p>
+
+  <p>
+    If ThoughtFrame can operate here — under noise, latency, and irreversible
+    events — it can operate anywhere.
+  </p>
+</section>
