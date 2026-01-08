@@ -1,76 +1,104 @@
 {
-  "sources": [
-    {
-      "id": "mic1",
-      "type": "ffmpeg",
-      "cmd": [
-        "ffmpeg",
-        "-i",
-        "samples/OneDayHydrophone.flac",
-        "-ac",
-        "1",
-        "-ar",
-        "48000",
-        "-f",
-        "f32le",
-        "-"
-      ],
-      "fs": 48000,
-      "chunk_size": 4096
-    }
-  ],
-
-  "arrays": [
-    {
-      "id": "towed_array",
-      "inputs": ["mic1"],
-      "geometry": {
-        "spacing_m": 0.5,
-        "sound_speed": 1500
-      },
-      "beams": [
-        { "id": "beam_-30", "angle": -30 },
-        { "id": "beam_0",   "angle": 0 },
-        { "id": "beam_30",  "angle": 30 }
-      ]
-    }
-  ],
-
-  "sensors": [
-    {
-      "id": "beam_0",
-      "type": "beam",
-      "array": "towed_array",
-      "pipeline": [
-        {
-          "op": "guard",
-          "name": "baseline",
-          "pipeline": [
-            { "op": "debug" },
-            { "op": "spectral_features" },
-            { "op": "isolation_forest", "threshold": -0.1 },
-            { "op": "temporal_context", "time": "1h" },
-            {
-              "op": "if_window_isolator",
-              "threshold": -0.15,
-              "min_duration": "1m"
-            },
-            {
-              "op": "impulse_isolator",
-              "threshold_mult": 10.0,
-              "window_sec": 5.0,
-              "min_impulses": 5
-            },
-            { "op": "telemetry" },
-         {"op": "forensic_summary"},
-         {
-          "op": "ring_buffer",
-          "seconds": 20
-        }   
-          ]
-        }
-        
-      ]
-    }
-  ]
+	"sources": [
+		{
+			"id": "mic1",
+			"type": "ffmpeg",
+			"cmd": [
+				"ffmpeg",
+				"-i",
+				"samples/OneDayHydrophone.flac",
+				"-ac",
+				"1",
+				"-ar",
+				"48000",
+				"-f",
+				"f32le",
+				"-"
+			],
+			"fs": 48000,
+			"chunk_size": 4096
+		}
+	],
+	"arrays": [
+		{
+			"id": "towed_array",
+			"inputs": [
+				"mic1"
+			],
+			"geometry": {
+				"spacing_m": 0.5,
+				"sound_speed": 1500
+			},
+			"beams": [
+				{
+					"id": "beam_-30",
+					"angle": -30
+				},
+				{
+					"id": "beam_0",
+					"angle": 0
+				},
+				{
+					"id": "beam_30",
+					"angle": 30
+				}
+			]
+		}
+	],
+	"sensors": [
+		{
+			"id": "beam_0",
+			"type": "beam",
+			"array": "towed_array",
+			"pipeline": [
+				{
+					"op": "guard",
+					"name": "baseline",
+					"pipeline": [
+						{
+							"op": "debug"
+						},
+						{
+							"op": "spectral_features"
+						},
+						{
+							"op": "dcmt_embedding"
+						},
+						{
+							"op": "dcmt_isolator"
+						},
+						{
+							"op": "isolation_forest",
+							"threshold": -0.1
+						},
+						{
+							"op": "temporal_context",
+							"time": "1h"
+						},
+						{
+							"op": "if_window_isolator",
+							"threshold": -0.15,
+							"min_duration": "1m"
+						},
+						{
+							"op": "impulse_isolator",
+							"threshold_mult": 10.0,
+							"window_sec": 5.0,
+							"min_impulses": 5
+						},
+						{
+							"op": "telemetry"
+						},
+						{
+							"op": "forensic_summary"
+						},
+						{
+							"op": "ring_buffer",
+							"seconds": 20
+						}
+					]
+				}
+			]
+		}
+	]
 }

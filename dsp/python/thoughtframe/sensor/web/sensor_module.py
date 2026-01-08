@@ -44,7 +44,7 @@ class SensorModule(BaseFrameModule):
     def generate_spectrogram(self, request):
         audio_url = request.get("audio_url")
         rel_output = request.get("output_path")
-        sensor_id  = request.get("beam_id")   # ✅ THIS IS THE FIX
+        sensor_id  = request.get("beam_id")   
     
         if not audio_url or not rel_output or not sensor_id:
             return {

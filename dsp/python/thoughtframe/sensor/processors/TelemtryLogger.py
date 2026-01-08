@@ -37,7 +37,11 @@ class TelemtryLogger(AcousticChunkProcessor):
                 "spec_centroid_hz",
                 "centroid_mean",
                 "iforest_score",
-                "anomaly_rate"
+                "anomaly_rate",
+                "dcmt_deviation",
+                "dcmt_embedding_norm",
+                "dcmt_pin_id",
+                "dcmt_pin_dist",
             ])
 
             
@@ -56,7 +60,12 @@ class TelemtryLogger(AcousticChunkProcessor):
             m.get("spec_centroid_hz"),
             m.get("centroid_mean"),
             m.get("iforest_score"),
-            m.get("anomaly_rate")
+            m.get("anomaly_rate"),
+            m.get("dcmt_deviation"),
+            m.get("dcmt_embedding_norm"),
+            m.get("dcmt_pin_id"),
+            m.get("dcmt_pin_dist"),
+            
         ])
         
         self._rows_since_flush += 1

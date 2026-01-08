@@ -10,3 +10,6 @@ from .TemporalContextProcessor import TemporalContextProcessor
 from .TimeWindowIsolator import TimeWindowIsolator 
 from .WindowIsolator import WindowIsolator
 from .SummaryProcessor import ForensicSummaryProcessor 
+from .QwenAudioProbe import QwenAudioProbe 
+from .DcmtEmbeddingProcessor import DcmtEmbeddingProcessor 
+from .DcmtIsolator import DcmtIsolator 

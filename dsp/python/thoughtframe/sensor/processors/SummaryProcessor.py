@@ -5,7 +5,7 @@ import csv
 import numpy as np
 
 import matplotlib
-matplotlib.use("Agg")  # headless-safe
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from pytimeparse.timeparse import timeparse
@@ -14,11 +14,8 @@ from thoughtframe.sensor.interface import AcousticChunkProcessor
 from tf_core.bootstrap import thoughtframe
 from thoughtframe.sensor.mesh_config import THOUGHTFRAME_CONFIG
 
+
 class ForensicSummaryProcessor(AcousticChunkProcessor):
-    """
-    Builds forensic summary plots from TelemetryLogger CSV output
-    and overlays window isolator decisions on baseline telemetry.
-    """
 
     OP_NAME = "forensic_summary"
 
@@ -26,18 +23,13 @@ class ForensicSummaryProcessor(AcousticChunkProcessor):
         self.sensor_id = sensor.sensor_id
         self.fs = sensor.fs
 
-        # How often summaries are rebuilt
         self.interval_sec = timeparse(cfg.get("interval", "30s"))
-
-        # Time horizons to summarize
         self.horizons = cfg.get("horizons", ["5m", "1h", "24h"])
 
-        # Match TelemetryLogger CSV naming logic
         base = cfg.get("csv_name", "telemetry")
         self.prefix = cfg.get("csv_prefix", "")
         filename = f"{self.prefix}_{base}.csv" if self.prefix else f"{base}.csv"
 
-        # Resolve telemetry directory
         self.data_root = thoughtframe.resolve_rooted_path(
             THOUGHTFRAME_CONFIG,
             THOUGHTFRAME_CONFIG.get("samples", "audio"),
@@ -46,20 +38,17 @@ class ForensicSummaryProcessor(AcousticChunkProcessor):
 
         self.telemetry_csv = os.path.join(self.data_root, filename)
 
-        # Output directory for forensic artifacts
         self.outdir = os.path.join(self.data_root, "forensics")
         os.makedirs(self.outdir, exist_ok=True)
 
         self._last_run = 0
-        self._spectrogram_buffer = [] # Holds chunks for the 5m rolling spectrogram
+        self._spectrogram_buffer = []
 
     @classmethod
     def from_config(cls, cfg, sensor):
         return cls(cfg, sensor)
 
     def process(self, chunk, analysis):
-        # Rolling buffer for the 5m spectrogram (sliding window)
-        # Keep approx 5 mins of audio based on fs and chunk size
         max_chunks = int((5 * 60) / (len(chunk) / self.fs))
         self._spectrogram_buffer.append(chunk.copy())
         if len(self._spectrogram_buffer) > max_chunks:
@@ -87,31 +76,27 @@ class ForensicSummaryProcessor(AcousticChunkProcessor):
 
         latest_t = rows[-1]["t_sec"]
 
-        # 1. Update the Sliding Spectrogram (5m only)
         if self._spectrogram_buffer:
             self._plot_spectrogram("5m")
 
-        # 2. Update all other forensic horizons
         for h in self.horizons:
             horizon_sec = timeparse(h)
             t_min = latest_t - horizon_sec
-            
-            # Filter telemetry rows for this horizon to prevent "ghosting"
             window = [r for r in rows if r["t_sec"] >= t_min]
 
             if len(window) < 10:
                 continue
 
             label = h.replace(" ", "")
-            
-            # FIXED: Pass t_min to methods and ensure methods accept it
+
             self._plot_baseline_with_impulses(window, label, t_min)
             self._plot_baseline_with_iforest(window, label, t_min)
-            
-            # Standard scalars
+
             self._plot_rms(window, label)
             self._plot_iforest(window, label)
             self._plot_centroid(window, label)
+
+            self._plot_dcmt_with_windows(window, label, t_min)
 
     # ============================================================
     # CSV loaders
@@ -134,8 +119,10 @@ class ForensicSummaryProcessor(AcousticChunkProcessor):
                             "centroid_mean": float(r.get("centroid_mean", 0)),
                             "iforest_score": float(r.get("iforest_score", 0)),
                             "anomaly_rate": float(r.get("anomaly_rate", 0)),
+                            "dcmt_deviation": float(r.get("dcmt_deviation", 0)),
+                            "dcmt_embedding_norm": float(r.get("dcmt_embedding_norm", 0)),
                         })
-                    except (ValueError, TypeError):
+                    except Exception:
                         continue
         except Exception:
             pass
@@ -159,20 +146,15 @@ class ForensicSummaryProcessor(AcousticChunkProcessor):
                             "start_t": float(r["start_t"]),
                             "end_t": float(r["end_t"]) if r.get("end_t") else None,
                         })
-                    except (ValueError, TypeError):
+                    except Exception:
                         continue
         except Exception:
             pass
         return rows
 
     # ============================================================
-    # Drawing primitives (FIXED to handle t_min)
+    # Window drawing helpers
     # ============================================================
-
-    def _draw_impulses(self, ax, windows, t_min):
-        for r in windows:
-            if r["start_t"] >= t_min:
-                ax.axvline(r["start_t"], color="black", linestyle=":", alpha=0.4)
 
     def _draw_windows(self, ax, windows, color, t_min):
         for r in windows:
@@ -181,27 +163,60 @@ class ForensicSummaryProcessor(AcousticChunkProcessor):
             start = r["start_t"]
             end = r["end_t"] if r["end_t"] else start
             if end >= t_min:
-                draw_start = max(start, t_min)
-                ax.axvspan(draw_start, end, color=color, alpha=0.15)
+                ax.axvspan(max(start, t_min), end, color=color, alpha=0.15)
+
+    def _draw_dcmt_windows(self, ax, windows, t_min):
+        # Stable color palette (extend if needed)
+        pin_colors = [
+            "#d62728",  # red
+            "#1f77b4",  # blue
+            "#2ca02c",  # green
+            "#ff7f0e",  # orange
+            "#9467bd",  # purple
+            "#17becf",  # cyan
+            "#8c564b",  # brown
+            "#e377c2",  # pink
+        ]
+    
+        for r in windows:
+            start = r["start_t"]
+            end = r["end_t"] if r["end_t"] else start
+    
+            if end < t_min:
+                continue
+    
+            state = r.get("state") or ""
+            if not state.startswith("PIN_"):
+                continue
+    
+            # Extract pin id
+            try:
+                pin_id = int(state.split("_")[1])
+            except Exception:
+                continue
+    
+            color = pin_colors[pin_id % len(pin_colors)]
+    
+            ax.axvspan(
+                max(start, t_min),
+                end,
+                color=color,
+                alpha=0.22
+            )
+
 
     def _get_out_path(self, type_name, label):
         fname = f"{self.prefix}_{type_name}_{label}.png" if self.prefix else f"{type_name}_{label}.png"
         return os.path.join(self.outdir, fname)
 
     # ============================================================
-    # Spectrogram (The Sliding Visual)
+    # Spectrogram
     # ============================================================
 
     def _plot_spectrogram(self, label):
-        # Concatenate buffered chunks into one continuous array
         data = np.concatenate(self._spectrogram_buffer)
-        
         plt.figure(figsize=(12, 4))
-        plt.specgram(data, Fs=self.fs, NFFT=1024, noverlap=512, cmap='magma')
-        plt.title(f"[{self.prefix}] Sliding Spectrogram - {label}")
-        plt.ylabel("Frequency (Hz)")
-        plt.xlabel("Seconds (relative)")
-        plt.colorbar(label='dB')
+        plt.specgram(data, Fs=self.fs, NFFT=1024, noverlap=512, cmap="magma")
         plt.tight_layout()
         plt.savefig(self._get_out_path("spectrogram", label))
         plt.close()
@@ -211,86 +226,82 @@ class ForensicSummaryProcessor(AcousticChunkProcessor):
     # ============================================================
 
     def _plot_rms(self, rows, label):
-        t = [r["t_sec"] for r in rows]
-        y = [r["rms_mean"] for r in rows]
         plt.figure(figsize=(10, 3))
-        plt.plot(t, y, linewidth=1, color='blue')
-        plt.title(f"[{self.prefix}] RMS (mean) – {label}")
+        plt.plot([r["t_sec"] for r in rows], [r["rms_mean"] for r in rows])
         plt.tight_layout()
         plt.savefig(self._get_out_path("rms", label))
         plt.close()
 
     def _plot_iforest(self, rows, label):
-        t = [r["t_sec"] for r in rows]
-        y = [r["iforest_score"] for r in rows]
         plt.figure(figsize=(10, 3))
-        plt.plot(t, y, linewidth=1, color='red')
+        plt.plot([r["t_sec"] for r in rows], [r["iforest_score"] for r in rows])
         plt.axhline(0, linestyle="--", alpha=0.4)
-        plt.title(f"[{self.prefix}] Isolation Forest – {label}")
         plt.tight_layout()
         plt.savefig(self._get_out_path("iforest", label))
         plt.close()
 
     def _plot_centroid(self, rows, label):
-        t = [r["t_sec"] for r in rows]
-        y = [r["centroid_mean"] for r in rows]
         plt.figure(figsize=(10, 3))
-        plt.plot(t, y, linewidth=1, color='green')
-        plt.title(f"[{self.prefix}] Centroid (mean) – {label}")
+        plt.plot([r["t_sec"] for r in rows], [r["centroid_mean"] for r in rows])
         plt.tight_layout()
         plt.savefig(self._get_out_path("centroid", label))
         plt.close()
 
     # ============================================================
-    # Forensic window overlays (FIXED with t_min)
+    # Composite forensic plots
     # ============================================================
 
     def _plot_baseline_with_impulses(self, rows, label, t_min):
-        impulses = self._load_windows_csv("ImpulseIsolator")
         t = [r["t_sec"] for r in rows]
         fig, axes = plt.subplots(3, 1, figsize=(12, 7), sharex=True)
 
-        axes[0].plot(t, [r["rms"] for r in rows], linewidth=0.8)
-        self._draw_impulses(axes[0], impulses, t_min)
-        axes[0].set_ylabel("RMS")
+        axes[0].plot(t, [r["rms"] for r in rows])
+        axes[1].plot(t, [r["spec_centroid_hz"] for r in rows])
+        axes[2].plot(t, [r["iforest_score"] for r in rows])
 
-        axes[1].plot(t, [r["spec_centroid_hz"] for r in rows], linewidth=0.8)
-        self._draw_impulses(axes[1], impulses, t_min)
-        axes[1].set_ylabel("Centroid (Hz)")
-
-        axes[2].plot(t, [r["iforest_score"] for r in rows], linewidth=0.8)
-        axes[2].axhline(0, linestyle="--", alpha=0.4)
-        self._draw_impulses(axes[2], impulses, t_min)
-        axes[2].set_ylabel("IF score")
-
-        plt.suptitle(f"[{self.prefix}] Baseline + Impulses — {label}")
         plt.tight_layout()
         plt.savefig(self._get_out_path("baseline_impulses", label))
         plt.close()
 
     def _plot_baseline_with_iforest(self, rows, label, t_min):
-        windows = self._load_windows_csv("IsolationForestWindowIsolator")
+        if_windows = self._load_windows_csv("IsolationForestWindowIsolator")
+        dcmt_windows = self._load_windows_csv("DcmtIsolator")
+
         t = [r["t_sec"] for r in rows]
-        fig, axes = plt.subplots(4, 1, figsize=(12, 9), sharex=True)
+        fig, axes = plt.subplots(5, 1, figsize=(12, 11), sharex=True)
 
-        axes[0].plot(t, [r["rms"] for r in rows], linewidth=0.8)
-        self._draw_windows(axes[0], windows, "red", t_min)
-        axes[0].set_ylabel("RMS")
+        axes[0].plot(t, [r["rms"] for r in rows])
+        axes[1].plot(t, [r["spec_centroid_hz"] for r in rows])
+        axes[2].plot(t, [r["iforest_score"] for r in rows])
+        axes[3].plot(t, [r["anomaly_rate"] for r in rows])
+        axes[4].plot(t, [r["dcmt_deviation"] for r in rows])
 
-        axes[1].plot(t, [r["spec_centroid_hz"] for r in rows], linewidth=0.8)
-        self._draw_windows(axes[1], windows, "red", t_min)
-        axes[1].set_ylabel("Centroid (Hz)")
+        for ax in axes[:4]:
+            self._draw_windows(ax, if_windows, "red", t_min)
 
-        axes[2].plot(t, [r["iforest_score"] for r in rows], linewidth=0.8)
-        axes[2].axhline(0, linestyle="--", alpha=0.4)
-        self._draw_windows(axes[2], windows, "red", t_min)
-        axes[2].set_ylabel("IF score")
+        self._draw_dcmt_windows(axes[4], dcmt_windows, t_min)
+        axes[4].set_ylabel("DCMT deviation")
 
-        axes[3].plot(t, [r["anomaly_rate"] for r in rows], linewidth=0.8)
-        self._draw_windows(axes[3], windows, "red", t_min)
-        axes[3].set_ylabel("Anomaly rate")
-
-        plt.suptitle(f"[{self.prefix}] Baseline + IF Windows — {label}")
         plt.tight_layout()
         plt.savefig(self._get_out_path("baseline_iforest", label))
+        plt.close()
+
+    # ============================================================
+    # DCMT-only plot
+    # ============================================================
+
+    def _plot_dcmt_with_windows(self, rows, label, t_min):
+        windows = self._load_windows_csv("DcmtIsolator")
+        t = [r["t_sec"] for r in rows]
+
+        fig, axes = plt.subplots(2, 1, figsize=(12, 5), sharex=True)
+
+        axes[0].plot(t, [r["dcmt_deviation"] for r in rows])
+        axes[1].plot(t, [r["dcmt_embedding_norm"] for r in rows])
+
+        for ax in axes:
+            self._draw_dcmt_windows(ax, windows, t_min)
+
+        plt.tight_layout()
+        plt.savefig(self._get_out_path("dcmt", label))
         plt.close()
