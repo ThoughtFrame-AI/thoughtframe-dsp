@@ -1,0 +1,47 @@
+CHAPTER I — NARRATIVE
+
+The sea was calm that morning, its surface broken only by the slow rise and fall of the ship beneath my feet. Gulls traced lazy arcs overhead, crying out as though they alone understood the vastness stretching to the horizon. The hull creaked softly, a living thing responding to wind and tide, while the scent of salt and old wood clung to every breath. I remember thinking that nothing truly dangerous could exist in a world that felt so endlessly open and quiet.
+
+------------------------------------------------------------
+
+SECTION 2 — LEGAL LANGUAGE
+
+The party of the first part hereby represents and warrants that all material facts disclosed herein are accurate and complete to the best of its knowledge. Failure to disclose any known liabilities, obligations, or contingent risks shall constitute a material breach of this agreement. In such an event, the non-breaching party shall be entitled to pursue all remedies available at law or in equity, including but not limited to rescission and monetary damages.
+
+------------------------------------------------------------
+
+SECTION 3 — TECHNICAL / PROCEDURAL INSTRUCTIONS
+
+To safely service the engine assembly, first disconnect the primary power source and verify that no residual voltage is present. Remove the protective housing by loosening the four mounting bolts in a counterclockwise sequence. Inspect the drive shaft for signs of wear, corrosion, or misalignment before reassembly. Failure to follow these steps may result in equipment damage or personal injury.
+
+------------------------------------------------------------
+
+SECTION 4 — FINANCIAL / ACCOUNTING DISCLOSURE
+
+Revenue for the fiscal quarter was materially overstated due to the premature recognition of deferred income. Several off-balance-sheet obligations were not disclosed in the original filings, creating a misleading representation of the company’s financial health. Adjusted earnings reflect a significant reduction once liabilities, depreciation, and contingent expenses are properly accounted for.
+
+------------------------------------------------------------
+
+SECTION 5 — EMOTIONAL / AFFECTIVE WRITING
+
+I felt the weight of the decision long before I understood it. There was a quiet dread in knowing that nothing I did could undo what had already been set in motion. Regret settled in slowly, not as a sharp pain, but as a dull and constant pressure that followed me through every waking moment.
+
+------------------------------------------------------------
+
+SECTION 6 — ABSTRACT / PHILOSOPHICAL
+
+Consciousness cannot be fully explained through mechanical causality alone. The subjective experience of awareness resists reduction to purely physical processes, suggesting that meaning arises not from structure, but from interpretation. In this way, understanding becomes less about accumulation of facts and more about the relationships between them.
+
+------------------------------------------------------------
+	HitTracker old = mem.query().exact("assetid", inAsset.getId()).search();
+		if (old.size() > 0)
+		{
+			mem.deleteAll(old, null);
+		}
+
+		Map<Integer, String> lines = loadLines(inBench, inAsset);
+		Map<Integer, Integer> lineToPage = getLineToPage();
+
+CHAPTER II — RETURN TO NARRATIVE
+
+As night fell, the ship pressed onward through darkened waters. The earlier calm had given way to an uneasy stillness, the kind that makes every sound feel amplified. Somewhere beneath the surface, unseen forces moved with purpose, indifferent to the fragile constructions that humans called vessels and voyages.
