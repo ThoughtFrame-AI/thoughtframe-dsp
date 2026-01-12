@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
+#####You’re thinking of the Johnson–Lindenstrauss lemma.
 class DepthwiseBlock(nn.Module):
     def __init__(self, in_ch, out_ch, stride=(1, 1)):
         super().__init__()

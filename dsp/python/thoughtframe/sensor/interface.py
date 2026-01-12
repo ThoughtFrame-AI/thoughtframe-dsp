@@ -83,7 +83,26 @@ class AcousticAnalysis:
         if self._log_mel is None:
             self._log_mel = librosa.power_to_db(self.mel)
         return self._log_mel
-
+    
+    @property
+    def complex_tensor(self):
+        """
+        Returns a stacked tensor of shape (2 * N_channels, Freq, Time).
+        For mono: (2, F, T) -> [Real, Imag]
+        """
+        # Get the complex STFT (already computed in self.stft via librosa)
+        z = self.stft  # Shape (F, T), dtype=complex128 or complex64
+        
+        # We need to handle potential multi-channel inputs in the future.
+        # If z is 2D (Freq, Time), we treat it as 1 channel.
+        if z.ndim == 2:
+            # Stack Real and Imaginary parts: Shape (2, F, T)
+            return np.stack([z.real, z.imag], axis=0)
+        
+        # If z is 3D (Channels, Freq, Time) for your future array:
+        elif z.ndim == 3:
+            # Result: (2 * Channels, F, T)
+            return np.concatenate([z.real, z.imag], axis=0)
 
 class AcousticChunkProcessor(ABC):
     OP_NAME: str | None = None

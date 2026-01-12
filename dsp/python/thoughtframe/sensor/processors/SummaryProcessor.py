@@ -217,6 +217,9 @@ class ForensicSummaryProcessor(AcousticChunkProcessor):
         data = np.concatenate(self._spectrogram_buffer)
         plt.figure(figsize=(12, 4))
         plt.specgram(data, Fs=self.fs, NFFT=1024, noverlap=512, cmap="magma")
+        plt.ylabel("Frequency (Hz)")
+        plt.xlabel("Seconds (relative)")
+        plt.colorbar(label='dB')
         plt.tight_layout()
         plt.savefig(self._get_out_path("spectrogram", label))
         plt.close()
@@ -228,6 +231,7 @@ class ForensicSummaryProcessor(AcousticChunkProcessor):
     def _plot_rms(self, rows, label):
         plt.figure(figsize=(10, 3))
         plt.plot([r["t_sec"] for r in rows], [r["rms_mean"] for r in rows])
+        plt.title(f"[{self.prefix}] RMS (mean) – {label}")
         plt.tight_layout()
         plt.savefig(self._get_out_path("rms", label))
         plt.close()
@@ -235,6 +239,7 @@ class ForensicSummaryProcessor(AcousticChunkProcessor):
     def _plot_iforest(self, rows, label):
         plt.figure(figsize=(10, 3))
         plt.plot([r["t_sec"] for r in rows], [r["iforest_score"] for r in rows])
+        plt.title(f"[{self.prefix}] Isolation Forest – {label}")
         plt.axhline(0, linestyle="--", alpha=0.4)
         plt.tight_layout()
         plt.savefig(self._get_out_path("iforest", label))
@@ -243,6 +248,7 @@ class ForensicSummaryProcessor(AcousticChunkProcessor):
     def _plot_centroid(self, rows, label):
         plt.figure(figsize=(10, 3))
         plt.plot([r["t_sec"] for r in rows], [r["centroid_mean"] for r in rows])
+        plt.title(f"[{self.prefix}] Centroid (mean) – {label}")
         plt.tight_layout()
         plt.savefig(self._get_out_path("centroid", label))
         plt.close()
@@ -258,6 +264,8 @@ class ForensicSummaryProcessor(AcousticChunkProcessor):
         axes[0].plot(t, [r["rms"] for r in rows])
         axes[1].plot(t, [r["spec_centroid_hz"] for r in rows])
         axes[2].plot(t, [r["iforest_score"] for r in rows])
+        axes[1].set_ylabel("Centroid (Hz)")
+        axes[2].set_ylabel("IF score")
 
         plt.tight_layout()
         plt.savefig(self._get_out_path("baseline_impulses", label))
